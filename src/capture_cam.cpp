@@ -1,23 +1,28 @@
-// src/main.cpp
+// webcam_view.cpp
+// OpenCV 4.6 - Windows : affiche la webcam (ESC pour quitter)
+
 #include <opencv2/opencv.hpp>
 #include <iostream>
 
-int main() {
-    // Sur Windows + Visual Studio, CAP_DSHOW est souvent le plus stable.
-    // Si ça ne marche pas, remplace par cv::CAP_MSMF.
+#include "capture_cam.h"
+
+void capture_cam() {
+    // Backends courants sous Windows : CAP_DSHOW (souvent stable) ou CAP_MSMF
     cv::VideoCapture cap(0, cv::CAP_DSHOW);
+    // Si ça ne marche pas, essaie :
+    // cv::VideoCapture cap(0, cv::CAP_MSMF);
 
     if (!cap.isOpened()) {
         std::cerr << "Erreur: impossible d'ouvrir la camera (index 0).\n";
-        std::cerr << "Essaie cv::CAP_MSMF ou un autre index (1, 2...).\n";
-        return 1;
-    }
+        std::cerr << "Essaie CAP_MSMF ou un autre index (1,2...).\n";
+     }
 
-    // Optionnel: forcer une résolution
+    // Optionnel: fixer une résolution
     cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
 
-    cv::namedWindow("Webcam", cv::WINDOW_AUTOSIZE);
+    const std::string winName = "Webcam (ESC pour quitter)";
+    cv::namedWindow(winName, cv::WINDOW_AUTOSIZE);
 
     cv::Mat frame;
     while (true) {
@@ -26,14 +31,12 @@ int main() {
             break;
         }
 
-        cv::imshow("Webcam", frame);
+        cv::imshow(winName, frame);
 
-        // ESC pour quitter
-        int key = cv::waitKey(10);
-        if (key == 27) break;
+        int key = cv::waitKey(1);
+        if (key == 27) break; // ESC
     }
 
     cap.release();
     cv::destroyAllWindows();
-    return 0;
 }

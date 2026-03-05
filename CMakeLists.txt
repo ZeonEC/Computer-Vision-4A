@@ -1,20 +1,47 @@
 #------------------------------------------------#
-# Fichier CMakeLists.txt pour le projet Computer Vision
+#  CMake configuration for Computer Vision project
 #------------------------------------------------#
 
+# Version minimale de CMake requise
 cmake_minimum_required(VERSION 3.16)
 
+# Nom du projet et langage utilisé
 project(Computer-Vision-4A LANGUAGES CXX)
 
+# Standard C++ utilisé
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Tous les exécutables iront dans build/
+# Tous les executables seront générés dans le dossier build/
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-file(GLOB SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+# -------------------------------------------------
+# Trouver OpenCV installé sur le système
+# -------------------------------------------------
+find_package(OpenCV REQUIRED)
 
-# Crée l'exécutable
-add_executable(main
-  ${SRC}          # ou juste src/main.cpp si tu préfères explicite
+# -------------------------------------------------
+# Dossiers d'include du projet
+# -------------------------------------------------
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${OpenCV_INCLUDE_DIRS}
 )
+
+# -------------------------------------------------
+# Fichiers sources
+# -------------------------------------------------
+set(SOURCES
+    src/main.cpp
+    src/capture_cam.cpp
+)
+
+# -------------------------------------------------
+# Création de l'exécutable principal
+# -------------------------------------------------
+add_executable(main ${SOURCES})
+
+# -------------------------------------------------
+# Link avec OpenCV
+# -------------------------------------------------
+target_link_libraries(main ${OpenCV_LIBS})
