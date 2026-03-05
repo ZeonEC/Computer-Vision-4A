@@ -1,31 +1,35 @@
 #------------------------------------------------#
-# Fichier CMakeLists.txt pour le projet Computer Vision #
+# Fichier CMakeLists.txt pour le projet Computer Vision
 #------------------------------------------------#
 
-#--- Configuration de CMake ---#
-cmake_minimum_required(VERSION 3.16) 
+cmake_minimum_required(VERSION 3.16)
 
-project(Computer-Vision-4A LANGUAGES CXX) 
-set(CMAKE_CXX_STANDARD 17) 
-set(CMAKE_CXX_STANDARD_REQUIRED ON) 
+project(Computer-Vision-4A LANGUAGES CXX)
 
-# Tous les exécutables iront dans build/ (ou build/bin si tu préfères) 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}) 
-file(GLOB SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp") 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#--- Configuration des libraires annexes ---#
+# Tous les exécutables iront dans build/
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+# (Optionnel) glob de sources si tu veux ajouter plusieurs .cpp automatiquement
+file(GLOB SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
-#-------------------------------------------#
+#--- OpenCV ---#
+find_package(OpenCV REQUIRED)
 
-
-# Crée l'exécutable à partir des fichiers sources
+# Crée l'exécutable
 add_executable(main
-  src/main.cpp
+  ${SRC}          # ou juste src/main.cpp si tu préfères explicite
 )
 
-#--- Lier les librairies au bon target ---# 
+# Includes de ton projet + OpenCV
+target_include_directories(main PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${OpenCV_INCLUDE_DIRS}
+)
 
-#-------------------------------------------#
-
-target_include_directories(main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+# Link OpenCV
+target_link_libraries(main PRIVATE
+  ${OpenCV_LIBS}
+)
