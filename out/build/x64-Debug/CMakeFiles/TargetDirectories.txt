@@ -1,3 +1,0 @@
-C:/Users/MGS3/source/repos/Computer-Vision-4A/out/build/x64-Debug/CMakeFiles/main.dir
-C:/Users/MGS3/source/repos/Computer-Vision-4A/out/build/x64-Debug/CMakeFiles/edit_cache.dir
-C:/Users/MGS3/source/repos/Computer-Vision-4A/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
