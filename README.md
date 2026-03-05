@@ -1,8 +1,8 @@
-﻿# Vision Stéréo – Estimation de la profondeur
+﻿# Vision Stéréo 
 
 ## Objectif
 
-L'objectif de ce projet est d'estimer la **profondeur d'une scène** à l'aide d'un **système de vision stéréo** (deux caméras).
+L'objectif de ce projet est d'estimer la **réconstruction 3D avec de la caméra** à l'aide d'un **système de vision stéréo** (deux caméras).
 
 En comparant la position d'un même point dans **l'image gauche** et **l'image droite**, il est possible de calculer la **disparité** et d'en déduire la **distance du point par rapport aux caméras**.
 
@@ -31,7 +31,7 @@ Ils décrivent les propriétés internes de la caméra :
 
 - la **focale** `f`
 - le **centre optique** `(cx, cy)`
-- la **distorsion de l'objectif`
+- la **distorsion de l'objectif**
 
 Ces paramètres sont regroupés dans la **matrice de caméra K**.
 
@@ -132,34 +132,6 @@ Interprétation :
 
 ---
 
-# 6. Estimation de la profondeur
-
-La profondeur peut être calculée avec la relation :
-
-Z = (f × B) / d
-
-où :
-
-- `Z` : profondeur
-- `f` : focale
-- `B` : baseline (distance entre les deux caméras)
-- `d` : disparité
-
-Cette relation provient du **modèle de caméra pinhole** basé sur les **triangles semblables (Thalès)**.
-
----
-
-# Modèle de caméra Pinhole
-
-Un point 3D `P(X,Y,Z)` est projeté sur l'image selon :
-
-u = f × (X / Z) + cx  
-v = f × (Y / Z) + cy
-
-Cela montre que les coordonnées image dépendent de **l'inverse de la profondeur (1/Z)**.
-
----
-
 # Formulation linéaire
 
 Certains problèmes d'estimation en vision par ordinateur peuvent être écrits sous la forme :
@@ -182,11 +154,8 @@ La solution est généralement obtenue avec la **décomposition en valeurs singu
 
 # Résumé
 
-Le pipeline de vision stéréo est le suivant :
-
 1. Calibration des caméras → estimation des paramètres intrinsèques et extrinsèques (R,T)  
 2. Géométrie épipolaire → contrainte sur la recherche de correspondances  
 3. Rectification → alignement horizontal des droites épipolaires  
 4. Matching → recherche des points correspondants  
 5. Calcul de la disparité → décalage entre les pixels  
-6. Estimation de la profondeur → reconstruction de la distance
