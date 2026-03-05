@@ -1,2 +1,8 @@
+################################################################################
+# Ce fichier .gitignore a été automatiquement créé par Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/out/build/x64-Debug
 /.vs
 /out/build/x64-Debug
