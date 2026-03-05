@@ -13,8 +13,7 @@
 	{
 		"commands" : 
 		[
-			"add_executable",
-			"target_include_directories"
+			"add_executable"
 		],
 		"files" : 
 		[
@@ -28,13 +27,7 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 23,
-				"parent" : 0
-			},
-			{
-				"command" : 1,
-				"file" : 0,
-				"line" : 31,
+				"line" : 20,
 				"parent" : 0
 			}
 		]
@@ -46,13 +39,6 @@
 			[
 				{
 					"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd"
-				}
-			],
-			"includes" : 
-			[
-				{
-					"backtrace" : 2,
-					"path" : "C:/Users/Chade/source/repos/ZeonEC/Computer-Vision-4A/include"
 				}
 			],
 			"language" : "CXX",
