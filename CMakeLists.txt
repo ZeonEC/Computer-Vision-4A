@@ -12,9 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Tous les exécutables iront dans build/
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-# (Optionnel) glob de sources si tu veux ajouter plusieurs .cpp automatiquement
 file(GLOB SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-
 
 # Crée l'exécutable
 add_executable(main
