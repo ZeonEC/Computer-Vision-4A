@@ -13,12 +13,6 @@ Principe :
 
 ---
 
-# Pipeline de vision stéréo
-
-Le processus de reconstruction 3D à partir de deux images se décompose en plusieurs étapes.
-
----
-
 # 1. Calibration des caméras
 
 La calibration permet de déterminer comment le **monde 3D est projeté sur le plan image 2D**.
