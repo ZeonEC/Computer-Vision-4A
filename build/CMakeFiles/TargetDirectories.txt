@@ -1,3 +1,0 @@
-/home/enzoec/Documents/GitHub/Computer-Vision-4A/build/CMakeFiles/main.dir
-/home/enzoec/Documents/GitHub/Computer-Vision-4A/build/CMakeFiles/edit_cache.dir
-/home/enzoec/Documents/GitHub/Computer-Vision-4A/build/CMakeFiles/rebuild_cache.dir
