@@ -1,0 +1,35 @@
+trouver des points et savoir comment ils se sont déplacés
+p1 a dist x sur cam1
+p1 a dist y sur cam2
+
+Entre image 1 et 2, établir une correspondance
+ + il y a de correspondance + on peut calculer la disparité
+plus de maching + de correspondance de point
+
+step :
+1 : calibration ---> tf de (R,T) caliberation stereo
+	pour chaque camera comment e monde 3d est projeté. (rows, cows) per img
+	(R,T) determiner sois par calcule (tres chaud) soit par image.
+	calibration même avec la meme camera par la même (micro diff)
+	si les deux calib sont faites on peut retrouver (R,T)
+
+2 : Geometrie epipolaire
+	la normale entre POg PoD pour établir une relation entre les deux camera
+	construite a partir de R,T ; PG ; PD
+	parfaitemenet calibré : droite du point de img1 va passer parfaitement sur le point de l'img2
+
+3 : Rectification
+
+4 : matching
+	epart = point
+	dense = zone entière
+
+5 : disparité
+
+pinhole camera model (avec thales apparement)
+x et y directement proportionnel a sa focal (profondeur)
+
+
+
+On contraint le vecteur de P a avoir une norme au carré = 1
+on veut Ap = 0 et norme^2 de p = 1
