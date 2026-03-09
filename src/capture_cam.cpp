@@ -13,13 +13,13 @@ void capture_cam() {
      }
 
     //fixer une résolution
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
+    cap.set(cv::CAP_PROP_FRAME_WIDTH, 600);
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 600);
 
     const std::string winName = "Webcam (ESC pour quitter)";
     cv::namedWindow(winName, cv::WINDOW_AUTOSIZE);
 
-    // donne au fichier le son numéro d'identification pour la calibration
+    // donne au fichier son numéro d'identification pour la calibration
     int nb_calib = 0;
 
     cv::Mat frame;
@@ -34,10 +34,14 @@ void capture_cam() {
         int key = cv::waitKey(1);
         if (key == 27) break; // ESC
 
+        // Sauvegarde de la photo pour la calibration
 		if (key == 's' || key == 'S') {
+            // numéro de la photo
             nb_calib++;
+            // chemin de sauvegarde
             std::string img_path = "../../../calibration_images/";
             std::string filename = img_path + "calib" + std::to_string(nb_calib) + ".jpg";
+            
             if (cv::imwrite(filename, frame)) {
                 std::cout << "Image sauvegardée: " << filename << "\n";
             } else {
@@ -48,5 +52,4 @@ void capture_cam() {
 
     cap.release();
     cv::destroyAllWindows();
-    //return 0;
 }
