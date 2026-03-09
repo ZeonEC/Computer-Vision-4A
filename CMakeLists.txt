@@ -34,10 +34,11 @@ include_directories(
 set(SOURCES
     src/main.cpp
     src/capture_cam.cpp
+    src/calibration.cpp
 )
 
 # -------------------------------------------------
-# Création de l'exécutable principal
+# Création de l'exécutable main
 # -------------------------------------------------
 add_executable(main ${SOURCES})
 
