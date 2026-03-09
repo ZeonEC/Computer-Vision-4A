@@ -9,8 +9,8 @@
 #include "capture_cam.h"
 
 int main() {
-	std::cout << "Hello, Computer Vision!" << std::endl;
-	std::cout << "BRANCH EC_Calibration" << std::endl;
+	std::cout << "Bonjour, Computer Vision," << std::endl;
+	std::cout << "BRANCHE MG_Calibration" << std::endl;
 	capture_cam();
 	return 0;
 }
