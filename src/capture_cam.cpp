@@ -16,7 +16,7 @@ void capture_cam() {
     cap.set(cv::CAP_PROP_FRAME_WIDTH, 600);
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, 600);
 
-    const std::string winName = "Webcam (ESC pour quitter)";
+    const std::string winName = "Webcam (ÉCHAP pour quitter)";
     cv::namedWindow(winName, cv::WINDOW_AUTOSIZE);
 
     // donne au fichier son numéro d'identification pour la calibration
