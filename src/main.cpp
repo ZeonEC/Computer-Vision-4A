@@ -10,9 +10,8 @@
 #include "calibration.hpp"
 
 int main() {
-	std::cout << "Bonjour, Computer Vision," << std::endl;
 	std::cout << "BRANCHE MG_Calibration" << std::endl;
-	//capture_cam();
-	calibration();
+	capture_cam();
+	//calibration();
 	return 0;
 }

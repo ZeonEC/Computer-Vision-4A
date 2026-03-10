@@ -1,52 +1,52 @@
 #include <iostream>
 #include <filesystem>
+#include <opencv2/opencv.hpp>
 #include <opencv2/calib3d.hpp>
 
 #include "calibration.hpp"
 
 void calibration()
 {
-	std::string images_path = "../../../calibration_images/";
+    std::string images_path = "../../../calibration_images/";
+    cv::Size patternSize(9, 6);
 
-	// chemin de l'image damier
-	std::string filename = images_path + "Damier1.png";
+    for (const auto& entry : std::filesystem::directory_iterator(images_path))
+    {
+        std::string filename = entry.path().string();
 
-	// charger l'image
-	cv::Mat image = cv::imread(filename);
+        std::cout << "Lecture : " << filename << std::endl;
 
-	if (image.empty())
-	{
-		std::cout << "Erreur : impossible de charger l'image\n";
-		return;
-	}
+        cv::Mat image = cv::imread(filename);
 
-	// réduire l'image directement
-	cv::resize(image, image, cv::Size(), 0.5, 0.5);
+        if (image.empty())
+        {
+            std::cout << "Impossible de charger l'image\n";
+            continue;
+        }
 
-	// afficher l'image
-	cv::imshow("Damier", image);
-	cv::waitKey(0);
+        std::vector<cv::Point2f> corners;
 
-	// taille du damier (coins internes)
-	cv::Size patternSize(9, 6);
+        bool found = cv::findChessboardCorners(image, patternSize, corners);
 
-	// conteneur pour les coins
-	std::vector<cv::Point2f> corners;
+        if (found)
+        {
+            std::cout << "Damier detecte\n";
+            cv::drawChessboardCorners(image, patternSize, corners, found);
+        }
+        else
+        {
+            std::cout << "Damier non detecte\n";
+        }
 
-	// detection du damier
-	bool found = cv::findChessboardCorners(image, patternSize, corners);
+        cv::imshow("Calibration", image);
 
-	if (found)
-	{
-		std::cout << "Damier detecte\n";
-		cv::drawChessboardCorners(image, patternSize, corners, found);
-	}
-	else
-	{
-		std::cout << "Damier non detecte\n";
-	}
+        std::cout << "Appuyer sur SPACE pour l'image suivante (ECHAP pour quitter)\n";
 
-	cv::imshow("Damier", image);
-	cv::waitKey(0);
+        int key = cv::waitKey(0);
 
+        if (key == 27)
+            break;
+    }
+
+    cv::destroyAllWindows();
 }
