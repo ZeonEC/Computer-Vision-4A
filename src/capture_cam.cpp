@@ -3,7 +3,7 @@
 
 #include "capture_cam.hpp"
 
-void capture_cam() {
+int capture_cam() {
 
     cv::VideoCapture cap(0, cv::CAP_DSHOW);
 
@@ -40,7 +40,7 @@ void capture_cam() {
             nb_calib++;
             // chemin de sauvegarde
             std::string img_path = "../../../calibration_images/";
-            std::string filename = img_path + "calib" + std::to_string(nb_calib) + ".png";
+            std::string filename = img_path + "calib" + std::to_string(nb_calib) + ".jpg";
             
             if (cv::imwrite(filename, frame)) {
                 std::cout << "Image sauvegardée: " << filename << "\n";
@@ -52,4 +52,5 @@ void capture_cam() {
 
     cap.release();
     cv::destroyAllWindows();
+    return nb_calib;
 }

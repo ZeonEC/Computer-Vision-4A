@@ -3,6 +3,6 @@
 
 #include <opencv2/opencv.hpp>
 
-void capture_cam();
+int capture_cam();
 
 #endif
