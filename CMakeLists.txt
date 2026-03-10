@@ -39,7 +39,7 @@ set(SOURCES
 # -------------------------------------------------
 # Création de l'exécutable principal
 # -------------------------------------------------
-add_executable(main ${SOURCES})
+add_executable(main ${SOURCES} "src/calibration.cpp")
 
 # -------------------------------------------------
 # Link avec OpenCV

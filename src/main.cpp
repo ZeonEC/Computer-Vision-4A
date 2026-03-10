@@ -6,11 +6,13 @@
 //#include <opencv2/highgui.hpp>
 //#include <opencv2/improc.hpp>
 
-#include "capture_cam.h"
+#include "capture_cam.hpp"
+#include "calibration.hpp"
 
 int main() {
 	std::cout << "Bonjour, Computer Vision," << std::endl;
 	std::cout << "BRANCHE MG_Calibration" << std::endl;
-	capture_cam();
+	//capture_cam();
+	calibration();
 	return 0;
 }
