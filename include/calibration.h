@@ -6,6 +6,6 @@
 #include <vector>
 #include <opencv2/calib3d.hpp>
 
-void calibrate_camera();
+std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib);
 
 #endif 

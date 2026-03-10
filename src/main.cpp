@@ -13,6 +13,6 @@ int main() {
 	std::cout << "Hello, Computer Vision!" << std::endl;
 	std::cout << "BRANCH EC_Calibration" << std::endl;
 	//capture_cam();
-	calibrate_camera();
+	std::vector<std::vector<cv::Point2f>> calibration_points = get_grid_points(5);
 	return 0;
 }
