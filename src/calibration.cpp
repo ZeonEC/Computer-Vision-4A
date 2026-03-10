@@ -48,7 +48,7 @@ std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib) {
 		}
 
 		// Transfère des points de l'image 
-		images_grid_points[i - 1] = corners;
+		images_grid_points.push_back(corners);
 
 		int y = 0;
 		for (int it = 0; it < corners.size(); it++)
