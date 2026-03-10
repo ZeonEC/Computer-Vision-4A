@@ -12,7 +12,7 @@
 int main() {
 	std::cout << "Hello, Computer Vision!" << std::endl;
 	std::cout << "BRANCH EC_Calibration" << std::endl;
-	int nb_to_try = capture_cam();
+	int nb_to_try = 7; //capture_cam();
 	std::vector<std::vector<cv::Point2f>> calibration_points = get_grid_points(nb_to_try);
 	show_grid_points(calibration_points);
 
