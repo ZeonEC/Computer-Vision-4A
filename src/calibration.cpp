@@ -1,5 +1,4 @@
 #include <iostream>
-#include <filesystem>
 #include <opencv2/opencv.hpp>
 #include <opencv2/calib3d.hpp>
 
@@ -8,20 +7,19 @@
 void calibration()
 {
     std::string images_path = "../../../calibration_images/";
-    cv::Size patternSize(9, 6);
 
-    for (const auto& entry : std::filesystem::directory_iterator(images_path))
+    cv::Size patternSize(4, 3);
+
+    for (int i = 1; i <= 20; i++)   // 20 images
     {
-        std::string filename = entry.path().string();
-
-        std::cout << "Lecture : " << filename << std::endl;
+        std::string filename = images_path + "calib" + std::to_string(i) + ".jpg";
 
         cv::Mat image = cv::imread(filename);
 
         if (image.empty())
         {
-            std::cout << "Impossible de charger l'image\n";
-            continue;
+            std::cout << "Fin des images\n";
+            break;
         }
 
         std::vector<cv::Point2f> corners;
@@ -30,17 +28,15 @@ void calibration()
 
         if (found)
         {
-            std::cout << "Damier detecte\n";
+            std::cout << "Damier detecte dans " << filename << "\n";
             cv::drawChessboardCorners(image, patternSize, corners, found);
         }
         else
         {
-            std::cout << "Damier non detecte\n";
+            std::cout << "Damier non detecte dans " << filename << "\n";
         }
 
         cv::imshow("Calibration", image);
-
-        std::cout << "Appuyer sur SPACE pour l'image suivante (ECHAP pour quitter)\n";
 
         int key = cv::waitKey(0);
 

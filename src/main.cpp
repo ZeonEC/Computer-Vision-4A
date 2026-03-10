@@ -8,10 +8,12 @@
 
 #include "capture_cam.hpp"
 #include "calibration.hpp"
+#include "menu.hpp"
 
 int main() {
 	std::cout << "BRANCHE MG_Calibration" << std::endl;
-	capture_cam();
+	//capture_cam();
 	//calibration();
+	menu();
 	return 0;
 }
