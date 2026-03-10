@@ -1,16 +1,16 @@
 #include "calibration.hpp"
 
-// On récupère un tableau de points de toute nous images de calibration
+// On recupère un tableau de points de toute nous images de calibration
 std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib) {
 
-	// on crée une vecteur de points pour la calibration
+	// on cree une vecteur de points pour la calibration
 	std::vector<cv::Point2f> corners;
-	// on crée le tableau de vecteur pour avoir toutes les informations dans une variable
+	// on cree le tableau de vecteur pour avoir toutes les informations dans une variable
 	std::vector<std::vector<cv::Point2f>> images_grid_points;
 	// on alloue la place dans le vecteur 
 	images_grid_points.reserve(std::max(0, nb_calib - 1));
 
-	cv::Size pattern_size(3, 7); // nombre de coins intérieurs dans la grille (7x9)
+	cv::Size pattern_size(3, 7); // nombre de coins interieurs dans la grille (7x9)
 
 	
 	for (int i = 1; i < nb_calib+1; i++)
@@ -21,22 +21,23 @@ std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib) {
 		// Charger une image de calibration
 		cv::Mat calib_image = cv::imread(FILENAME);
 
-		// verifie si l'image a été chargée correctement
+		// verifie si l'image a ete chargee correctement
 		if (calib_image.empty()) {
 			std::cerr << "Erreur: impossible de charger l'image de calibration.\n";
+			std::cerr << "Verifie le chemin et le nom du fichier: " << FILENAME << "\n";
 			continue;
 		}
 		else {
-			std::cout << "Image de calibration chargée avec succès.\n";
+			std::cout << "Image de calibration chargee avec succès.\n";
 		}
 
-		// Trouver les coins de la grille, on laisse le FLAGS par défaut
+		// Trouver les coins de la grille, on laisse le FLAGS par defaut
 		bool found = cv::findChessboardCorners(calib_image, pattern_size, corners);
 
 		
 		if (found) {
-			std::cout << "Coins de la grille trouvés avec succès.\n";
-			// Afficher les coins trouvés sur l'image
+			std::cout << "Coins de la grille trouves avec succès.\n";
+			// Afficher les coins trouves sur l'image
 			cv::drawChessboardCorners(calib_image, pattern_size, corners, found);
 			cv::imshow(WINDOWNAME, calib_image);
 			cv::waitKey(0);
@@ -49,7 +50,6 @@ std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib) {
 
 		// Transfère des points de l'image 
 		images_grid_points.push_back(corners);
-
 		int y = 0;
 	}
 	return images_grid_points;
