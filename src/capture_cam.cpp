@@ -1,7 +1,7 @@
 #include <iostream>
 #include <filesystem>
 
-#include "capture_cam.h"
+#include "capture_cam.hpp"
 
 void capture_cam() {
 
@@ -40,7 +40,7 @@ void capture_cam() {
             nb_calib++;
             // chemin de sauvegarde
             std::string img_path = "../../../calibration_images/";
-            std::string filename = img_path + "calib" + std::to_string(nb_calib) + ".jpg";
+            std::string filename = img_path + "calib" + std::to_string(nb_calib) + ".png";
             
             if (cv::imwrite(filename, frame)) {
                 std::cout << "Image sauvegardée: " << filename << "\n";

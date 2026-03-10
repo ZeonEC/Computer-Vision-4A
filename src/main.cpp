@@ -6,11 +6,15 @@
 //#include <opencv2/highgui.hpp>
 //#include <opencv2/improc.hpp>
 
-#include "capture_cam.h"
+#include "capture_cam.hpp"
+#include "calibration.hpp"
 
 int main() {
 	std::cout << "Hello, Computer Vision!" << std::endl;
 	std::cout << "BRANCH EC_Calibration" << std::endl;
-	capture_cam();
+	//capture_cam();
+	std::vector<std::vector<cv::Point2f>> calibration_points = get_grid_points(5);
+	show_grid_points(calibration_points);
+
 	return 0;
 }
