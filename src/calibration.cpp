@@ -13,11 +13,11 @@ std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib) {
 	cv::Size pattern_size(3, 7); // nombre de coins intérieurs dans la grille (7x9)
 
 	
-	for (int i = 1; i < nb_calib; i++)
+	for (int i = 1; i < nb_calib+1; i++)
 	{
 		//    ../../../calibration_images/calib1.jpg
 		std::string FILENAME = "../../../calibration_images/calib" + std::to_string(i) + ".jpg";
-		std::string WINDOWNAME = "Calibration de l'image numéro : " + std::to_string(i);
+		std::string WINDOWNAME = "Calibration de l'image numero : " + std::to_string(i);
 		// Charger une image de calibration
 		cv::Mat calib_image = cv::imread(FILENAME);
 
@@ -51,14 +51,22 @@ std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib) {
 		images_grid_points.push_back(corners);
 
 		int y = 0;
-		for (int it = 0; it < corners.size(); it++)
-		{
-			// on montre tous les points
-			std::cout << "Point numéro : " << y << std::endl;
-			std::cout << corners[it] << std::endl;
+	}
+	return images_grid_points;
+}
+
+// Affiche les points de la grille pour chaque image de calibration
+void show_grid_points(std::vector<std::vector<cv::Point2f>> &images_grid_points) {
+	int i = 1;
+	for (const auto& corners : images_grid_points) {
+		std::cout << "Image numero : " << i << std::endl;
+		int y = 0;
+		for (const auto& corner : corners) {
+			std::cout << "Point numero : " << y << std::endl;
+			std::cout << corner << std::endl;
 			std::cout << "" << std::endl;
 			y++;
 		}
+		i++;
 	}
-	return images_grid_points;
 }
