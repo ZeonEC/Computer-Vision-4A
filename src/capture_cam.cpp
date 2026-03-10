@@ -1,7 +1,7 @@
 #include <iostream>
 #include <filesystem>
 
-#include "capture_cam.h"
+#include "capture_cam.hpp"
 
 void capture_cam() {
 

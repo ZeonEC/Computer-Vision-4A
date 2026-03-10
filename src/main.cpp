@@ -6,8 +6,8 @@
 //#include <opencv2/highgui.hpp>
 //#include <opencv2/improc.hpp>
 
-#include "capture_cam.h"
-#include "calibration.h"
+#include "capture_cam.hpp"
+#include "calibration.hpp"
 
 int main() {
 	std::cout << "Hello, Computer Vision!" << std::endl;

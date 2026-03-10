@@ -1,5 +1,5 @@
-#ifndef CAPTURE_CAM_H
-#define CAPTURE_CAM_H
+#ifndef CAPTURE_CAM_HPP
+#define CAPTURE_CAM_HPP
 
 #include <opencv2/opencv.hpp>
 

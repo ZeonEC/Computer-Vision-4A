@@ -1,5 +1,5 @@
-#ifndef CALIBRATION_H
-#define CALIBRATION_H
+#ifndef CALIBRATION_HPP
+#define CALIBRATION_HPP
 
 #include <opencv2/opencv.hpp>
 #include <iostream>
