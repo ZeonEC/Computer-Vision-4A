@@ -5,7 +5,7 @@
 
 int capture_cam(cv::Size taille_image) {
 
-    cv::VideoCapture cap(1, cv::CAP_DSHOW);
+    cv::VideoCapture cap(0, cv::CAP_DSHOW);
 
     if (!cap.isOpened()) {
         std::cerr << "Erreur: impossible d'ouvrir la camera (index 0).\n";
@@ -42,7 +42,7 @@ int capture_cam(cv::Size taille_image) {
             nb_calib++;
             // chemin de sauvegarde
             std::string img_path = "../../../calibration_images/";
-            std::string filename = img_path + "calib" + std::to_string(nb_calib) + ".jpg";
+            std::string filename = img_path + "calib" + std::to_string(nb_calib) + ".png";
             
             if (cv::imwrite(filename, frame)) {
                 std::cout << "Image sauvegardée: " << filename << "\n";

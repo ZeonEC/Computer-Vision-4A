@@ -62,6 +62,9 @@ std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib) {
 // 
 void calibration(std::vector<std::vector<cv::Point2f>> &calibration_points, cv::Size& taille_image) {
 	
+
+	//	CREATION DE L'OUTPUT ARRAY OBJECTS_POINTS POUR CALIBRATION
+	// 
 	// points 3D dans le monde réel de la grille de calibration, on suppose que la grille est sur le plan z=0
 	// ils sont espace de 12mm, donc 12*12
 	// calcule des points 3D de la grille de calibration
@@ -86,7 +89,43 @@ void calibration(std::vector<std::vector<cv::Point2f>> &calibration_points, cv::
 		obj_points.push_back(obj);
 	}
 
-	//double calibrated = cv::calibrateCamera(obj_points, calibration_points, taille_image);
+	// CREATION DE L'INPUTOUTPUT ARRAY CAMERA_MATRIX (on vas laisser la fonction de calibrage calculer la matrice de la camera)
+	cv::Mat camera_matrix;
+
+	// CREATION DE L'INPUTOUTPUT ARRAY DIST_COEFFS (on vas laisser la fonction de calibrage calculer les coefficients de distorsion)
+	// on alloue la place pour les coefficients de distorsion (5 coefficients pour le modèle de distorsion radial et tangentiel)
+	cv::Mat dist_coeffs;
+
+	// CREATION DE L'OUTPUT ARRAY Rvecs et TVecs (vecteurs de rotation et de translation pour chaque image de calibration)
+	std::vector<cv::Mat> rvecs;
+	std::vector<cv::Mat> tvecs;
+	
+	// CREATION DES OUTPUT ARRAY stdDeviationsIntrensics et stdDeviationsExtrinsics (écart type des paramètres intrinsèques et extrinsèques)
+	std::vector<double> stdDeviationsIntrinsics;
+	std::vector<double> stdDeviationsExtrinsics;
+
+	// CREATION DE L'OUTPUT ARRAY perViewErrors (erreur de reprojection pour chaque image de calibration)
+	std::vector<double> perViewErrors;
+
+	double RMS = cv::calibrateCamera(
+		obj_points, calibration_points, taille_image, camera_matrix, dist_coeffs, rvecs, 
+		tvecs, stdDeviationsExtrinsics, stdDeviationsExtrinsics, perViewErrors);
+	
+	if (RMS <= 0.5)
+	{
+		std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
+		std::cout << "Calibration TRES BONNE" << std::endl;
+	}
+	else if (RMS > 0.5 && RMS <= 1.0)
+	{
+		std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
+		std::cout << "Calibration BONNE" << std::endl;
+	}
+	else
+	{
+		std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
+		std::cout << "Calibration MAUVAISE" << std::endl;
+	
 }
 
 

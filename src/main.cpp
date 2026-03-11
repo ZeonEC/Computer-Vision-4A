@@ -16,7 +16,7 @@ int main() {
 
 	// Capture de la camera
 	cv::Size taille_image = cv::Size(600, 600);
-	int nb_to_try = capture_cam(taille_image);
+	int nb_to_try = 20; // capture_cam(taille_image);
 
 	// Recuperation de la grille et affichage dans le terminale
 	std::vector<std::vector<cv::Point2f>> calibration_points = get_grid_points(nb_to_try);
