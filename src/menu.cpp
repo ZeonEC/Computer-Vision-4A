@@ -8,6 +8,7 @@ void menu()
 {
     int choix;
 
+    // boucle infini pour afficher le menu
     while (true)
     {
         std::cout << "\n===== MENU =====\n";
@@ -16,6 +17,7 @@ void menu()
         std::cout << "0 : Quitter\n";
         std::cout << "Choix : ";
 
+        // lecture du choix
         std::cin >> choix;
 
         if (choix == 1)
@@ -28,7 +30,7 @@ void menu()
         }
         else if (choix == 0)
         {
-            break;
+            break; //return
         }
         else
         {
