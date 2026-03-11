@@ -1,58 +1,79 @@
 #include <iostream>
+#include <vector>
 #include <opencv2/opencv.hpp>
 #include <opencv2/calib3d.hpp>
 
 #include "calibration.hpp"
 
+
+
+// fonction qui récupère les images de calibration
+void getCalibrationImages(std::string images_path, std::vector<std::string>& images)
+{
+    int i = 1;
+
+    while (true)
+    {
+        std::string filename = images_path + "calib" + std::to_string(i) + ".png";
+
+        cv::Mat test = cv::imread(filename);
+
+        // si l'image n'existe pas on arrête
+        if (test.empty())
+            break;
+
+        images.push_back(filename);
+
+        i++;
+    }
+}
+
+
+
+// fonction principale de calibration
 void calibration()
 {
-    std::string images_path = "../../../calibration_images/"; 
+    std::string images_path = "../../../calibration_images/";
 
-    // taille du damier en nombre de coin interne
-    // 4 coins horizontaux et 3 coins verticaux
-    cv::Size patternSize(4, 3);
+    // conteneur qui stockera les chemins des images
+    std::vector<std::string> images;
 
-    for (int i = 1; i <= 20; i++)   // 20 images
+    // récupérer les images
+    getCalibrationImages(images_path, images);
+
+    // taille du damier (coins internes)
+    cv::Size patternSize(7, 9);
+
+    for (const auto& filename : images)
     {
-        // construction du nom du fichier
-        std::string filename = images_path + "calib" + std::to_string(i) + ".jpg";
-
-        // lecture de l'image depuis le disque
         cv::Mat image = cv::imread(filename);
 
         if (image.empty())
-        {
-            std::cout << "Fin des images\n";
-            break;
-        }
+            continue;
 
-        // vecteur contenant les positions des coins détectés
         std::vector<cv::Point2f> corners;
 
-        // fonction OpenCV qui détecte les coins du damier 
         bool found = cv::findChessboardCorners(image, patternSize, corners);
 
         if (found)
         {
-            std::cout << "Damier detecte dans " << filename << "\n";
-            // dessin des coins détectés sur l'image
+            std::cout << "Damier detecte dans : " << filename << "\n";
+
             cv::drawChessboardCorners(image, patternSize, corners, found);
         }
         else
         {
-            std::cout << "Damier non detecte dans " << filename << "\n";
+            std::cout << "Damier non detecte dans : " << filename << "\n";
         }
 
-        // Affiche le résultat 
         cv::imshow("Calibration", image);
 
-        // si la fenêtre est fermée avec la croix
+        // si on ferme la fenêtre
         if (cv::getWindowProperty("Calibration", cv::WND_PROP_VISIBLE) < 1)
             break;
 
-        int key = cv::waitKey(0); 
+        int key = cv::waitKey(0);
 
-        // ESC pour arrêter 
         if (key == 27)
             break;
     }
