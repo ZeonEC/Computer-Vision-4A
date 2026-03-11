@@ -114,29 +114,31 @@ void calibration(std::vector<std::vector<cv::Point2f>>& calibration_points, cv::
 	std::cout << "Camera Matrix: " << std::endl << camera_matrix << std::endl;
 	std::cout << "Distortion Coefficients: " << std::endl << dist_coeffs << std::endl;
 
+	// Pour toutes les images de calibration, affiche les vecteurs de rotation et de translation
 	for (int i = 0; i < rvecs.size(); i++) {
 		std::cout << "Image " << i + 1 << ":" << std::endl;
 		std::cout << "Rotation Vector: " << std::endl << rvecs[i] << std::endl;
 		std::cout << "Translation Vector: " << std::endl << tvecs[i] << std::endl;
-
-		if (RMS <= 0.5)
-		{
-			std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
-			std::cout << "Calibration TRES BONNE" << std::endl;
-		}
-		else if (RMS > 0.5 && RMS <= 1.0)
-		{
-			std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
-			std::cout << "Calibration BONNE" << std::endl;
-		}
-		else
-		{
-			std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
-			std::cout << "Calibration MAUVAISE" << std::endl;
-		}
 	}
 
-	show_images_compare(20, camera_matrix, dist_coeffs);
+	// Affiche l'erreur de reprojection moyenne et la "qualité" de la calibration
+	if (RMS <= 0.5)
+	{
+		std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
+		std::cout << "Calibration TRES BONNE" << std::endl;
+	}
+	else if (RMS > 0.5 && RMS <= 1.0)
+	{
+		std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
+		std::cout << "Calibration BONNE" << std::endl;
+	}
+	else
+	{
+		std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
+		std::cout << "Calibration MAUVAISE" << std::endl;
+	}
+
+	show_images_compare(20, camera_matrix, dist_coeffs, taille_image);
 }
 
 // Affiche les points de la grille pour chaque image de calibration
@@ -155,7 +157,24 @@ void show_grid_points(std::vector<std::vector<cv::Point2f>> &images_grid_points)
 	}
 }
 
-void show_images_compare(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coeffs) {
+void show_images_compare(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coeffs, cv::Size& taille_image) {
+
+	// on utilisera R pour la stéréo rectification de l'image
+	// pour l'instant elle peut être vide.
+	cv::Mat R;
+
+	// Le deuxieme argument camera_matrix reste le même que le premier argument, 
+	// car on ne change pas la matrice de la camera pour la stéréo rectification ou en utilisant getOptimalNewCameraMatrix
+	// a chanegr plus tard si on veut faire de la stéréo
+
+	int m1type = CV_32FC1; // type de la map pour la stéréo rectification
+	cv::Mat  map1, map2; // maps pour la stéréo rectification
+
+	// L'utilisation de initUndistortRectifyMap et remap est supposé plus performante.
+	// cela permet de faire le calcul de la correction de distorsion une seule fois 
+	// et de l'appliquer à toutes les images de calibration, au lieu de recalculer la correction pour chaque image 
+	// avec undistort.
+	cv::initUndistortRectifyMap(camera_matrix, dist_coeffs,R, camera_matrix, taille_image, m1type, map1, map2 );
 
 	for (int i = 1; i < nb_to_try; i++) {
 
@@ -166,8 +185,14 @@ void show_images_compare(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coef
 
 
 		// on undistord l'image de calibration en utilisant les paramètres de calibration obtenus
+		// transforme ces paramètres en correspondance pixel et applique la correction de distorsion à l'image de calibration
+		//
+		// Originale : si on veut pas s'embeterinitUndistortRectifyMap et remap
+		// cv::Mat undistorted_image;
+		//cv::undistort(original_image, undistorted_image, camera_matrix, dist_coeffs);
+		
 		cv::Mat undistorted_image;
-		cv::undistort(original_image, undistorted_image, camera_matrix, dist_coeffs);
+		cv::remap(original_image, undistorted_image, map1, map2, cv::INTER_LINEAR);
 		cv::imshow("Image undistordue de la calibration numero : " + std::to_string(i), undistorted_image);
 
 		cv::waitKey(0);

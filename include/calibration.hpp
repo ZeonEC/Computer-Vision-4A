@@ -12,6 +12,6 @@ void calibration(std::vector<std::vector<cv::Point2f>> &calibration_points, cv::
 
 void show_grid_points(std::vector<std::vector<cv::Point2f>> &images_grid_points);
 
-void show_images_compare(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coeffs);
+void show_images_compare(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coeffs, cv::Size& taille_image);
 
 #endif 
