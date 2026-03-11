@@ -3,9 +3,9 @@
 
 #include "capture_cam.hpp"
 
-int capture_cam() {
+int capture_cam(cv::Size taille_image) {
 
-    cv::VideoCapture cap(0, cv::CAP_DSHOW);
+    cv::VideoCapture cap(1, cv::CAP_DSHOW);
 
     if (!cap.isOpened()) {
         std::cerr << "Erreur: impossible d'ouvrir la camera (index 0).\n";
@@ -13,8 +13,10 @@ int capture_cam() {
      }
 
     //fixer une résolution
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, 600);
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 600);
+    cap.set(cv::CAP_PROP_FRAME_WIDTH, taille_image.width);
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, taille_image.height);
+
+    
 
     const std::string winName = "Webcam (ESC pour quitter)";
     cv::namedWindow(winName, cv::WINDOW_AUTOSIZE);
