@@ -56,12 +56,12 @@ std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib) {
 	return images_grid_points;
 }
 
+//  Le dérouler de la fonction calibration suit le guide de la documentation de OpenCV pour la fonction calibrateCamera :
+// https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#gaa1e5b8f2c7e7b1a9
+// https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html // MAJORITAIREMENT
 
+void calibration(std::vector<std::vector<cv::Point2f>>& calibration_points, cv::Size& taille_image) {
 
-// PROCHAINE ETAPE : cv::CalibrateCamera
-// 
-void calibration(std::vector<std::vector<cv::Point2f>> &calibration_points, cv::Size& taille_image) {
-	
 
 	//	CREATION DE L'OUTPUT ARRAY OBJECTS_POINTS POUR CALIBRATION
 	// 
@@ -99,7 +99,7 @@ void calibration(std::vector<std::vector<cv::Point2f>> &calibration_points, cv::
 	// CREATION DE L'OUTPUT ARRAY Rvecs et TVecs (vecteurs de rotation et de translation pour chaque image de calibration)
 	std::vector<cv::Mat> rvecs;
 	std::vector<cv::Mat> tvecs;
-	
+
 	// CREATION DES OUTPUT ARRAY stdDeviationsIntrensics et stdDeviationsExtrinsics (écart type des paramètres intrinsèques et extrinsèques)
 	std::vector<double> stdDeviationsIntrinsics;
 	std::vector<double> stdDeviationsExtrinsics;
@@ -108,26 +108,36 @@ void calibration(std::vector<std::vector<cv::Point2f>> &calibration_points, cv::
 	std::vector<double> perViewErrors;
 
 	double RMS = cv::calibrateCamera(
-		obj_points, calibration_points, taille_image, camera_matrix, dist_coeffs, rvecs, 
+		obj_points, calibration_points, taille_image, camera_matrix, dist_coeffs, rvecs,
 		tvecs, stdDeviationsExtrinsics, stdDeviationsExtrinsics, perViewErrors);
-	
-	if (RMS <= 0.5)
-	{
-		std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
-		std::cout << "Calibration TRES BONNE" << std::endl;
-	}
-	else if (RMS > 0.5 && RMS <= 1.0)
-	{
-		std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
-		std::cout << "Calibration BONNE" << std::endl;
-	}
-	else
-	{
-		std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
-		std::cout << "Calibration MAUVAISE" << std::endl;
-	
-}
 
+	std::cout << "Camera Matrix: " << std::endl << camera_matrix << std::endl;
+	std::cout << "Distortion Coefficients: " << std::endl << dist_coeffs << std::endl;
+
+	for (int i = 0; i < rvecs.size(); i++) {
+		std::cout << "Image " << i + 1 << ":" << std::endl;
+		std::cout << "Rotation Vector: " << std::endl << rvecs[i] << std::endl;
+		std::cout << "Translation Vector: " << std::endl << tvecs[i] << std::endl;
+
+		if (RMS <= 0.5)
+		{
+			std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
+			std::cout << "Calibration TRES BONNE" << std::endl;
+		}
+		else if (RMS > 0.5 && RMS <= 1.0)
+		{
+			std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
+			std::cout << "Calibration BONNE" << std::endl;
+		}
+		else
+		{
+			std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
+			std::cout << "Calibration MAUVAISE" << std::endl;
+		}
+	}
+
+	show_images_compare(20, camera_matrix, dist_coeffs);
+}
 
 // Affiche les points de la grille pour chaque image de calibration
 void show_grid_points(std::vector<std::vector<cv::Point2f>> &images_grid_points) {
@@ -143,4 +153,25 @@ void show_grid_points(std::vector<std::vector<cv::Point2f>> &images_grid_points)
 		}
 		i++;
 	}
+}
+
+void show_images_compare(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coeffs) {
+
+	for (int i = 1; i < nb_to_try; i++) {
+
+		std::string original_FILENAME = "../../../calibration_images/calib" + std::to_string(i) + ".png";
+		std::string original_WINDOWNAME = "Calibration de l'image numero : " + std::to_string(i);
+		cv::Mat original_image = cv::imread(original_FILENAME);
+		cv::imshow(original_WINDOWNAME, original_image);
+
+
+		// on undistord l'image de calibration en utilisant les paramètres de calibration obtenus
+		cv::Mat undistorted_image;
+		cv::undistort(original_image, undistorted_image, camera_matrix, dist_coeffs);
+		cv::imshow("Image undistordue de la calibration numero : " + std::to_string(i), undistorted_image);
+
+		cv::waitKey(0);
+		cv::destroyAllWindows();
+	}
+	cv::destroyAllWindows();
 }
