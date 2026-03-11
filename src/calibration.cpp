@@ -111,34 +111,21 @@ void calibration(std::vector<std::vector<cv::Point2f>>& calibration_points, cv::
 		obj_points, calibration_points, taille_image, camera_matrix, dist_coeffs, rvecs,
 		tvecs, stdDeviationsExtrinsics, stdDeviationsExtrinsics, perViewErrors);
 
-	std::cout << "Camera Matrix: " << std::endl << camera_matrix << std::endl;
-	std::cout << "Distortion Coefficients: " << std::endl << dist_coeffs << std::endl;
+	// Pas oublier que si le chemin est si long c'est parce qu'on est dans le dossier build
+	// donc on doit faire ../.. pour remonter dans le dossier src et ensuite aller dans le dossier calibration_images
+	save_calibration_xml("../../../calibration_images/results/calibration_cam" + std::to_string(1) + "_result.xml",
+		camera_matrix,
+		dist_coeffs,
+		rvecs,
+		tvecs,
+		perViewErrors,
+		RMS,
+		taille_image);
 
-	// Pour toutes les images de calibration, affiche les vecteurs de rotation et de translation
-	for (int i = 0; i < rvecs.size(); i++) {
-		std::cout << "Image " << i + 1 << ":" << std::endl;
-		std::cout << "Rotation Vector: " << std::endl << rvecs[i] << std::endl;
-		std::cout << "Translation Vector: " << std::endl << tvecs[i] << std::endl;
-	}
-
-	// Affiche l'erreur de reprojection moyenne et la "qualité" de la calibration
-	if (RMS <= 0.5)
-	{
-		std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
-		std::cout << "Calibration TRES BONNE" << std::endl;
-	}
-	else if (RMS > 0.5 && RMS <= 1.0)
-	{
-		std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
-		std::cout << "Calibration BONNE" << std::endl;
-	}
-	else
-	{
-		std::cout << "Calibration terminee avec une erreur de reprojection moyenne de : " << RMS << std::endl;
-		std::cout << "Calibration MAUVAISE" << std::endl;
-	}
-
-	show_images_compare(20, camera_matrix, dist_coeffs, taille_image);
+	// Visualisation de la correction de distorsion sur les images de calibration
+	// 
+	// show_images_compare(20, camera_matrix, dist_coeffs, taille_image);
+	//
 }
 
 // Affiche les points de la grille pour chaque image de calibration
@@ -199,4 +186,50 @@ void show_images_compare(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coef
 		cv::destroyAllWindows();
 	}
 	cv::destroyAllWindows();
+}
+
+// Sauvegarde les paramètres de calibration dans un fichier XML
+
+void save_calibration_xml(const std::string& filename,
+	const cv::Mat& camera_matrix,
+	const cv::Mat& dist_coeffs,
+	const std::vector<cv::Mat>& rvecs,
+	const std::vector<cv::Mat>& tvecs,
+	const std::vector<double>& perViewErrors,
+	double RMS,
+	const cv::Size& taille_image)
+{
+	cv::FileStorage fs(filename, cv::FileStorage::WRITE);
+
+	if (!fs.isOpened()) {
+		std::cerr << "Erreur : impossible d'ouvrir le fichier XML en ecriture.\n";
+		return;
+	}
+
+	fs << "image_width" << taille_image.width;
+	fs << "image_height" << taille_image.height;
+	fs << "RMS" << RMS;
+	fs << "camera_matrix" << camera_matrix;
+	fs << "dist_coeffs" << dist_coeffs;
+	fs << "rvecs" << "[";
+	for (const auto& r : rvecs) {
+		fs << r;
+	}
+	fs << "]";
+
+	fs << "tvecs" << "[";
+	for (const auto& t : tvecs) {
+		fs << t;
+	}
+	fs << "]";
+
+	fs << "perViewErrors" << "[";
+	for (double e : perViewErrors) {
+		fs << e;
+	}
+	fs << "]";
+
+	fs.release();
+
+	std::cout << "Calibration sauvegardee dans : " << filename << std::endl;
 }
