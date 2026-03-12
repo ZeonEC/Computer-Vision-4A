@@ -123,9 +123,7 @@ void calibration(std::vector<std::vector<cv::Point2f>>& calibration_points, cv::
 		taille_image);
 
 	// Visualisation de la correction de distorsion sur les images de calibration
-	// 
-	// show_images_compare(20, camera_matrix, dist_coeffs, taille_image);
-	//
+	show_images_compare(calibration_points.size(), camera_matrix, dist_coeffs, taille_image);
 }
 
 // Affiche les points de la grille pour chaque image de calibration
@@ -232,4 +230,51 @@ void save_calibration_xml(const std::string& filename,
 	fs.release();
 
 	std::cout << "Calibration sauvegardee dans : " << filename << std::endl;
+}
+
+void get_calibration_from_xml(const std::string& filename,
+	cv::Mat& camera_matrix,
+	cv::Mat& dist_coeffs,
+	std::vector<cv::Mat>& rvecs,
+	std::vector<cv::Mat>& tvecs,
+	std::vector<double>& perViewErrors,
+	double& RMS,
+	cv::Size& taille_image)
+{
+	// ouverture du fichier en mode lecture
+	cv::FileStorage fs(filename, cv::FileStorage::READ);
+	if (!fs.isOpened()) {
+		std::cerr << "Erreur : impossible d'ouvrir le fichier XML en lecture.\n";
+		return;
+	}
+	// Recuperation des valeurs depuis le fichier XML
+	fs["image_width"] >> taille_image.width;
+	fs["image_height"] >> taille_image.height;
+	fs["RMS"] >> RMS;
+	fs["camera_matrix"] >> camera_matrix;
+	fs["dist_coeffs"] >> dist_coeffs;
+
+	// obliger de faire une boucle pour recuperer les rvecs et tvecs 
+	// car ils sont stockés dans un tableau dans le fichier XML
+	// ducoup ça reprend pas sous forme de vecteur de Mat mais de tableau de Mat dans le fichier XML
+	cv::FileNode rvecs_node = fs["rvecs"];
+	for (auto it = rvecs_node.begin(); it != rvecs_node.end(); ++it) {
+		cv::Mat r;
+		*it >> r;
+		rvecs.push_back(r);
+	}
+	cv::FileNode tvecs_node = fs["tvecs"];
+	for (auto it = tvecs_node.begin(); it != tvecs_node.end(); ++it) {
+		cv::Mat t;
+		*it >> t;
+		tvecs.push_back(t);
+	}
+	cv::FileNode errors_node = fs["perViewErrors"];
+	for (auto it = errors_node.begin(); it != errors_node.end(); ++it) {
+		double e;
+		*it >> e;
+		perViewErrors.push_back(e);
+	}
+	fs.release(); //fermeture
+	std::cout << "Calibration chargee depuis : " << filename << std::endl;
 }

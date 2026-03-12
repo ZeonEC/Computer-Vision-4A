@@ -23,4 +23,12 @@ void save_calibration_xml(const std::string& filename,
 	double RMS,
 	const cv::Size& taille_image);
 
+void get_calibration_from_xml(const std::string& filename,
+	cv::Mat& camera_matrix,
+	cv::Mat& dist_coeffs,
+	std::vector<cv::Mat>& rvecs,
+	std::vector<cv::Mat>& tvecs,
+	std::vector<double>& perViewErrors,
+	double& RMS,
+	cv::Size& taille_image);
 #endif 
