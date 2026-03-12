@@ -33,13 +33,17 @@ include_directories(
 # -------------------------------------------------
 set(SOURCES
     src/main.cpp
+    src/menu.cpp
     src/capture_cam.cpp
+    src/calibration.cpp
+    src/charger_calibration.cpp
+    
 )
 
 # -------------------------------------------------
 # Création de l'exécutable principal
 # -------------------------------------------------
-add_executable(main ${SOURCES} "src/calibration.cpp" "src/menu.cpp")
+add_executable(main ${SOURCES} )
 
 # -------------------------------------------------
 # Link avec OpenCV
