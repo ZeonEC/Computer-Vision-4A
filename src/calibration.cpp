@@ -1,51 +1,20 @@
 #include <iostream>
-#include <vector>
 #include <opencv2/opencv.hpp>
-#include <opencv2/calib3d.hpp>
 
 #include "calibration.hpp"
 
-
-
-// fonction qui récupère les images de calibration
-void getCalibrationImages(std::string images_path, std::vector<std::string>& images)
+std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib)
 {
-    int i = 1;
+    std::vector<std::vector<cv::Point2f>> images_grid_points;
 
-    while (true)
+    cv::Size pattern_size(7, 9);
+
+    for (int i = 1; i <= nb_calib; i++)
     {
-        std::string filename = images_path + "calib" + std::to_string(i) + ".png";
+        std::string filename =
+            "../../../calibration_images/calib" +
+            std::to_string(i) + ".png";
 
-        cv::Mat test = cv::imread(filename);
-
-        // si l'image n'existe pas on arrête
-        if (test.empty())
-            break;
-
-        images.push_back(filename);
-
-        i++;
-    }
-}
-
-
-
-// fonction principale de calibration
-void calibration()
-{
-    std::string images_path = "../../../calibration_images/";
-
-    // conteneur qui stockera les chemins des images
-    std::vector<std::string> images;
-
-    // récupérer les images
-    getCalibrationImages(images_path, images);
-
-    // taille du damier (coins internes)
-    cv::Size patternSize(7, 9);
-
-    for (const auto& filename : images)
-    {
         cv::Mat image = cv::imread(filename);
 
         if (image.empty())
@@ -53,30 +22,49 @@ void calibration()
 
         std::vector<cv::Point2f> corners;
 
-        bool found = cv::findChessboardCorners(image, patternSize, corners);
+        bool found =
+            cv::findChessboardCorners(image, pattern_size, corners);
 
         if (found)
         {
-            std::cout << "Damier detecte dans : " << filename << "\n";
+            images_grid_points.push_back(corners);
 
-            cv::drawChessboardCorners(image, patternSize, corners, found);
+            cv::drawChessboardCorners(image, pattern_size, corners, found);
+            cv::imshow("Corners", image);
+            cv::waitKey(500);
         }
-        else
-        {
-            std::cout << "Damier non detecte dans : " << filename << "\n";
-        }
-
-        cv::imshow("Calibration", image);
-
-        // si on ferme la fenêtre
-        if (cv::getWindowProperty("Calibration", cv::WND_PROP_VISIBLE) < 1)
-            break;
-
-        int key = cv::waitKey(0);
-
-        if (key == 27)
-            break;
     }
 
     cv::destroyAllWindows();
+
+    return images_grid_points;
+}
+
+
+void show_grid_points(
+    std::vector<std::vector<cv::Point2f>>& images_grid_points)
+{
+    int i = 1;
+
+    for (const auto& corners : images_grid_points)
+    {
+        std::cout << "Image " << i << std::endl;
+
+        for (const auto& p : corners)
+            std::cout << p << std::endl;
+
+        i++;
+    }
+}
+
+
+void calibration(
+    std::vector<std::vector<cv::Point2f>>& calibration_points,
+    cv::Size& taille_image)
+{
+    std::cout << "Calibration lancee..." << std::endl;
+
+    std::cout << "Nombre d'images utilisees : "
+        << calibration_points.size()
+        << std::endl;
 }

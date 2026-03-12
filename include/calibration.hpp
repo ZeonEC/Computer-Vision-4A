@@ -1,11 +1,13 @@
-#ifndef CALIBRATION_HPP
-#define CALIBRATION_HPP
+#pragma once
 
-#include <opencv2/opencv.hpp>
 #include <vector>
-#include <string>
+#include <opencv2/opencv.hpp>
 
-// Fonction qui va effectuer la calibration de la caméra
-void calibration();
+std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib);
 
-#endif
+void show_grid_points(std::vector<std::vector<cv::Point2f>>& images_grid_points);
+
+void calibration(
+    std::vector<std::vector<cv::Point2f>>& calibration_points,
+    cv::Size& taille_image
+);
