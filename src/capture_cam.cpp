@@ -1,84 +1,85 @@
-#include <iostream>
-#include <opencv2/opencv.hpp>
+#include <iostream>      // pour afficher des messages dans la console
+#include <filesystem>    // pour manipuler des chemins de fichiers
 
-#include "capture_cam.hpp"
+#include "capture_cam.hpp" // fichier header de la fonction
 
-void capture_cam()
-{
-    // création d'un objet VideoCapture permettant d'accéder à la webcam
-    // 0 signifie : première caméra du système
-    // CAP_DSHOW indique d'utiliser DirectShow (backend caméra sous Windows)
+// fonction qui capture des images avec la webcam
+// elle retourne un entier = nombre d'images sauvegardées pour la calibration
+int capture_cam(cv::Size taille_image) {
+
+    // ouvre la webcam (0 = première caméra du PC)
+    // CAP_DSHOW = backend DirectShow sous Windows (plus stable que le défaut)
     cv::VideoCapture cap(0, cv::CAP_DSHOW);
 
-    // création d'un objet VideoCapture permettant d'accéder à la webcam
-    // 0 signifie : première caméra du système
-    // CAP_DSHOW indique d'utiliser DirectShow (backend caméra sous Windows)
-    if (!cap.isOpened())
-    {
-        std::cerr << "Erreur: impossible d'ouvrir la camera.\n";
-        return;
+    // vérifie si la caméra s'est bien ouverte
+    if (!cap.isOpened()) {
+        std::cerr << "Erreur: impossible d'ouvrir la camera (index 0).\n";
+        std::cerr << "Essaie CAP_MSMF ou un autre index (1,2...).\n";
     }
 
-    // définition de la résolution de capture
-    // on force la caméra à produire des images 600x600
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, 600);
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 600);
+    // fixe la résolution de l'image capturée
+    cap.set(cv::CAP_PROP_FRAME_WIDTH, taille_image.width);
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, taille_image.height);
 
     // nom de la fenêtre d'affichage
-    const std::string winName = "Webcam (S = save, ESC = quit)";
+    const std::string winName = "Webcam (ESC pour quitter)";
+
     // création de la fenêtre OpenCV
     cv::namedWindow(winName, cv::WINDOW_AUTOSIZE);
 
-    // compteur pour numéroter les images de calibration
+    // compteur du nombre d'images prises pour la calibration
     int nb_calib = 0;
-    // compteur pour numéroter les images de calibration
+
+    // matrice qui contiendra chaque image capturée
     cv::Mat frame;
 
-    // boucle infinie pour lire en continu la webcam
-    while (true)
-    {
-        // lecture d'une image depuis la caméra
-        // frame contiendra les pixels de l'image
-        if (!cap.read(frame) || frame.empty())
-        {
+    // boucle infinie pour lire la webcam en continu
+    while (true) {
+
+        // capture une image depuis la webcam
+        // read() remplit la matrice frame
+        if (!cap.read(frame) || frame.empty()) {
             std::cerr << "Erreur: frame vide.\n";
             break;
         }
 
-        // affichage de l'image dans la fenêtre
+        // affiche l'image dans la fenêtre
         cv::imshow(winName, frame);
 
-        // si la fenêtre est fermée avec la croix
-        if (cv::getWindowProperty(winName, cv::WND_PROP_VISIBLE) < 1)
-            break;
-
-        // waitKey attend une touche clavier pendant 1 ms
-        // il renvoie la valeur ASCII de la touche pressée
+        // attend une touche clavier pendant 1 ms
         int key = cv::waitKey(1);
 
-        // touche ESC 
-        if (key == 27)
-            break;
+        // si ESC est pressé → quitter le programme
+        if (key == 27) break;
 
-        if (key == 's' || key == 'S')
-        {
-            // on incrémente le compteur d'image
+        // si la touche 's' ou 'S' est pressée → sauvegarder l'image
+        if (key == 's' || key == 'S') {
+
+            // incrémente le compteur d'image
             nb_calib++;
 
+            // chemin du dossier où enregistrer les images
             std::string img_path = "../../../calibration_images/";
 
-            // construction du nom du fichier
+            // nom du fichier (calib1.png, calib2.png, etc.)
             std::string filename = img_path + "calib" + std::to_string(nb_calib) + ".png";
-                
-            // sauvegarde de l'image dans un fichier
-            if (cv::imwrite(filename, frame))
-                std::cout << "Image sauvegardee: " << filename << "\n";
-            else
-                std::cerr << "Erreur sauvegarde\n";
+
+            // sauvegarde l'image
+            if (cv::imwrite(filename, frame)) {
+                std::cout << "Image sauvegardée: " << filename << "\n";
+            }
+            else {
+                std::cerr << "Erreur: impossible de sauvegarder l'image.\n";
+            }
         }
     }
-    // sauvegarde de l'image dans un fichier
+
+    // libère la webcam
     cap.release();
-    // libération de la caméra
+
+    // ferme toutes les fenêtres OpenCV
     cv::destroyAllWindows();
+
+    // retourne le nombre total d'images capturées
+    return nb_calib;
 }
