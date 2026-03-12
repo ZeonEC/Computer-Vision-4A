@@ -68,7 +68,7 @@ void capture_cam()
             std::string img_path = "../../../calibration_images/";
 
             // construction du nom du fichier
-            std::string filename = img_path + "calib" + std::to_string(nb_calib) + ".jpg";
+            std::string filename = img_path + "calib" + std::to_string(nb_calib) + ".png";
                 
             // sauvegarde de l'image dans un fichier
             if (cv::imwrite(filename, frame))
