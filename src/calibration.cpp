@@ -1,72 +1,127 @@
-#include "calibration.hpp"
+#include <iostream>          // bibliothèque pour afficher du texte dans le terminal
+#include <opencv2/opencv.hpp> // bibliothèque principale OpenCV (images, matrices, fonctions vision)
 
-// On recupère un tableau de points de toute nous images de calibration
-std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib) {
+#include "calibration.hpp"   // header contenant les prototypes des fonctions de calibration
 
-	// on cree une vecteur de points pour la calibration
+
 // ============================================================================
-	// on cree le tableau de vecteur pour avoir toutes les informations dans une variable
-	std::vector<std::vector<cv::Point2f>> images_grid_points;
+// Fonction : get_grid_points
+// Rôle : détecter les coins du damier dans toutes les images de calibration
+// Entrée : nb_calib → nombre d'images de calibration à analyser
+// Sortie : un vecteur contenant les coordonnées des coins détectés pour chaque image
+// ============================================================================
+
+std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib)
+{
+    // tableau contenant les coins détectés pour toutes les images
+    std::vector<std::vector<cv::Point2f>> images_grid_points;
 	// on alloue la place dans le vecteur 
 	images_grid_points.reserve(std::max(0, nb_calib - 1));
 
-	cv::Size pattern_size(3, 7); // nombre de coins interieurs dans la grille (7x9)
+    // taille du damier : nombre de coins internes (colonnes, lignes)
+	// à voir 
+    cv::Size pattern_size(7, 9);
 
-	
-	for (int i = 1; i < nb_calib+1; i++)
-	{
-		//    ../../../calibration_images/calib1.jpg
-		std::string FILENAME = "../../../calibration_images/calib" + std::to_string(i) + ".jpg";
-		std::string WINDOWNAME = "Calibration de l'image numero : " + std::to_string(i);
-		// Charger une image de calibration
-		cv::Mat calib_image = cv::imread(FILENAME);
+    // boucle sur toutes les images de calibration
+    for (int i = 1; i <= nb_calib; i++)
+    {
+        // construction du nom du fichier image
+        std::string filename =
+            "../../../calibration_images/calib" +
+            std::to_string(i) + ".png";
 
-		// verifie si l'image a ete chargee correctement
-		if (calib_image.empty()) {
-			std::cerr << "Erreur: impossible de charger l'image de calibration.\n";
-			std::cerr << "Verifie le chemin et le nom du fichier: " << FILENAME << "\n";
-			continue;
+        // chargement de l'image
+        cv::Mat image = cv::imread(filename);
+
+        // si l'image n'existe pas ou ne s'ouvre pas → on passe à la suivante
+        if (image.empty())
+            continue;
 		}
 		else {
 			std::cout << "Image de calibration chargee avec succès.\n";
 		}
 
-		// Trouver les coins de la grille, on laisse le FLAGS par defaut
-		bool found = cv::findChessboardCorners(calib_image, pattern_size, corners);
+        // vecteur qui contiendra les coins détectés dans cette image
+        std::vector<cv::Point2f> corners;
 
-		
-		if (found) {
-			std::cout << "Coins de la grille trouves avec succès.\n";
-			// Afficher les coins trouves sur l'image
-			cv::drawChessboardCorners(calib_image, pattern_size, corners, found);
-			cv::imshow(WINDOWNAME, calib_image);
-			cv::waitKey(0);
+        // recherche automatique des coins du damier dans l'image
+        bool found =
+            cv::findChessboardCorners(image, pattern_size, corners);
 
-			cv::destroyWindow(WINDOWNAME);
-		}
+        // si les coins sont détectés
+        if (found)
+        {
+            // on ajoute les coins trouvés dans la liste globale
+            images_grid_points.push_back(corners);
+
+            // dessine les coins détectés sur l'image (pour visualisation)
+            cv::drawChessboardCorners(image, pattern_size, corners, found);
+
+            // affiche l'image avec les coins détectés
+            cv::imshow("Corners", image);
+
+            // pause de 500 ms pour voir le résultat
+            cv::waitKey(500);
+        }
 		else {
 			std::cerr << "Erreur: impossible de trouver les coins de la grille.\n";
-		}
+    }
 
-		// Transfère des points de l'image 
-		images_grid_points.push_back(corners);
-		int y = 0;
-	}
-	return images_grid_points;
+    // fermeture des fenêtres OpenCV
+    cv::destroyAllWindows();
+
+    // retourne tous les points détectés
+    return images_grid_points;
 }
 
-// Affiche les points de la grille pour chaque image de calibration
-void show_grid_points(std::vector<std::vector<cv::Point2f>> &images_grid_points) {
-	int i = 1;
-	for (const auto& corners : images_grid_points) {
-		std::cout << "Image numero : " << i << std::endl;
-		int y = 0;
-		for (const auto& corner : corners) {
-			std::cout << "Point numero : " << y << std::endl;
-			std::cout << corner << std::endl;
-			std::cout << "" << std::endl;
-			y++;
-		}
-		i++;
-	}
+
+// ============================================================================
+// Fonction : show_grid_points
+// Rôle : afficher dans le terminal les coordonnées des coins détectés
+// Entrée : vecteur contenant les coins pour chaque image
+// ============================================================================
+
+void show_grid_points(
+    std::vector<std::vector<cv::Point2f>>& images_grid_points)
+{
+    int i = 1;
+
+    // parcours de chaque image
+    for (const auto& corners : images_grid_points)
+    {
+        std::cout << "Image " << i << std::endl;
+
+        // parcours de tous les coins détectés dans l'image
+        for (const auto& p : corners)
+
+            // affichage de la position du coin (x,y)
+            std::cout << p << std::endl;
+
+        i++;
+    }
+}
+
+
+// ============================================================================
+// Fonction : calibration
+// Rôle : lancer la calibration de la caméra à partir des points détectés
+// Entrées :
+//   calibration_points → coins du damier détectés dans les images
+//   taille_image → taille des images utilisées
+// ============================================================================
+
+void calibration()
+{
+    cv::Size taille_image(600, 600);
+
+    int nb;
+
+    std::cout << "Nombre d'images calibration : ";
+    std::cin >> nb;
+
+    auto pts = get_grid_points(nb);
+
+    show_grid_points(pts);
+
+    calibration(pts, taille_image);
 }

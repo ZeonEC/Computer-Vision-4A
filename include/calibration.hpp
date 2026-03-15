@@ -15,3 +15,5 @@ void calibration(
     std::vector<std::vector<cv::Point2f>>& calibration_points,
     cv::Size& taille_image
 );
+
+#endif
