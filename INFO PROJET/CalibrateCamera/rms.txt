@@ -1,0 +1,68 @@
+Valeur retournée par cv::calibrateCamera :
+
+La valeur retournée (double) est l'erreur RMS de reprojection (Root Mean Square error).
+
+Cette erreur mesure la différence moyenne entre :
+- les points détectés dans l'image (findChessboardCorners)
+- les points reprojetés avec les paramètres trouvés (cameraMatrix + distCoeffs)
+
+L'unité est en pixels.
+
+Formule mathématique :
+
+RMS = sqrt( (1/N) * Σ || x_observe - x_projete ||² )
+
+avec :
+
+N = nombre total de points utilisés pour la calibration
+
+x_observe = position du coin détecté dans l'image
+
+x_projete = position du point 3D reprojeté dans l'image avec les paramètres calibrés
+
+|| . || = distance euclidienne entre les deux points
+
+Interprétation :
+
+Si RMS = 0.5 :
+cela signifie que les points reprojetés sont en moyenne à 0.5 pixel des vrais points détectés.
+
+Plus la valeur est proche de 0, meilleure est la calibration.
+
+Ordres de grandeur typiques :
+
+RMS < 0.2  → excellent (vision industrielle)
+0.2 – 0.5  → très bon
+0.5 – 1.0  → acceptable
+1.0 – 2.0  → mauvais
+> 2        → calibration incorrecte
+
+Valeurs réalistes pour une webcam :
+0.3 → 0.8 pixels
+
+Objectif courant pour un projet :
+RMS < 0.5
+
+Causes fréquentes d'une mauvaise RMS :
+
+- mauvais nombre de coins internes
+- mauvaise taille des carrés
+- images floues
+- peu d'angles différents
+- mauvais éclairage
+- coins mal détectés
+- pas de refinement avec cornerSubPix
+
+Important :
+
+Une RMS faible ne garantit pas une calibration parfaite.
+Il faut aussi vérifier que :
+
+- fx et fy sont réalistes
+- cx et cy sont proches du centre image
+- les distCoeffs restent petits
+
+Résumé :
+
+La valeur retournée par calibrateCamera est l'erreur moyenne de reprojection en pixels.
+Plus elle est faible, plus la calibration est précise.

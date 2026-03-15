@@ -1,0 +1,33 @@
+Pour cv::CalibrateCamera, généralement on laisse opencv calculer la matrice de la caméra 
+et les coefficients de distorsion à partir d'un ensemble d'images de calibration. 
+Cependant, si vous avez déjà une matrice de caméra et des coefficients de distorsion, 
+vous pouvez les utiliser directement pour la correction de l'image.
+
+1. Ce que OpenCV fait :
+
+OpenCV utilise le modèle de projection pinhole :
+
+u = fx * (X / Z) + cx
+v = fy * (Y / Z) + cy
+
+où :
+
+X,Y,Z = coordonnées du point dans le repère caméra
+u,v   = coordonnées du point dans l'image (pixels)
+fx,fy = focales en pixels
+cx,cy = centre optique
+
+OpenCV ajuste les paramètres :
+
+fx fy cx cy
+
+pour minimiser l'erreur de reprojection :
+
+|| x_mesure - x_projete ||
+
+où :
+
+x_mesure  = point détecté dans l'image
+x_projete = projection du point 3D avec les paramètres estimés
+
+Le but est donc de trouver les paramètres intrinsèques qui rendent la projection théorique la plus proche possible des points réellement observés.
