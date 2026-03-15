@@ -1,99 +1,56 @@
-#include <iostream>          // bibliothèque pour afficher des messages dans le terminal
-#include <opencv2/opencv.hpp> // bibliothèque OpenCV principale (caméra, images, affichage)
+#include <iostream>
+#include <filesystem>
 
-#include "capture_cam.hpp"   // header contenant la déclaration de la fonction capture_cam
+#include "capture_cam.hpp"
 
+int capture_cam(cv::Size taille_image, int& cur_cam) {
 
-// ============================================================================
-// Fonction : capture_cam
-// Rôle : capturer des images depuis la webcam pour la calibration
-// Entrée : taille_image → résolution souhaitée de l'image capturée
-// Sortie : nombre d'images sauvegardées pour la calibration
-// ============================================================================
+    cv::VideoCapture cap(cur_cam, cv::CAP_DSHOW);
 
-int capture_cam(cv::Size taille_image)
-{
-
-    cv::Size taille_image(600, 600);
-
-    // ouverture de la webcam (index 0 = première caméra du PC)
-    // CAP_DSHOW = backend DirectShow (plus stable sous Windows)
-    cv::VideoCapture cap(0, cv::CAP_DSHOW);
-
-    // vérifie si la caméra s'est correctement ouverte
-    if (!cap.isOpened())
-    {
-        std::cerr << "Erreur ouverture camera\n";
-        return 0;
+    if (!cap.isOpened()) {
+        std::cerr << "Erreur: impossible d'ouvrir la camera (index 0).\n";
+        std::cerr << "Essaie CAP_MSMF ou un autre index (1,2...).\n";
     }
 
-    // configuration de la résolution de capture
+    //fixer une résolution
     cap.set(cv::CAP_PROP_FRAME_WIDTH, taille_image.width);
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, taille_image.height);
 
-    // matrice OpenCV qui contiendra chaque image capturée
-    cv::Mat frame;
+    const std::string winName = "Webcam (ESC pour quitter)";
+    cv::namedWindow(winName, cv::WINDOW_AUTOSIZE);
 
-    // compteur du nombre d'images de calibration enregistrées
+    // donne au fichier son numéro d'identification pour la calibration
     int nb_calib = 0;
 
-    // boucle infinie pour lire la webcam en continu
-    while (true)
-    {
-        // capture une image depuis la webcam
-        cap >> frame;
-
-        // si l'image est vide (problème caméra) on arrête
-        if (frame.empty())
+    cv::Mat frame;
+    while (true) {
+        if (!cap.read(frame) || frame.empty()) {
+            std::cerr << "Erreur: frame vide.\n";
             break;
+        }
 
-        // affiche l'image dans une fenêtre
-        cv::imshow("Webcam", frame);
+        cv::imshow(winName, frame);
 
-        // attend une touche clavier pendant 1 ms
         int key = cv::waitKey(1);
+        if (key == 27) break; // ESC
 
-        // si la touche ESC est pressée → on quitte la capture
-        if (key == 27)
-            break;
-
-        // si la touche 's' ou 'S' est pressée → sauvegarder l'image
-        if (key == 's' || key == 'S')
-        {
-            // incrémente le nombre d'images de calibration
+        // Sauvegarde de la photo pour la calibration
+        if (key == 's' || key == 'S') {
+            // numéro de la photo
             nb_calib++;
-<<<<<<< HEAD
             // chemin de sauvegarde
             std::string img_path = "../../../calibration_images/";
-            std::string filename = img_path + "calib" + std::to_string(nb_calib) + ".png";
-            
+            std::string filename = img_path + "calib_cam" + std::to_string(cur_cam) + "_" + std::to_string(nb_calib) + ".png";
+
             if (cv::imwrite(filename, frame)) {
                 std::cout << "Image sauvegardée: " << filename << "\n";
-            } else {
+            }
+            else {
                 std::cerr << "Erreur: impossible de sauvegarder l'image.\n";
             }
-=======
-
-            // construction du nom du fichier image
-            std::string filename =
-                "../../../calibration_images/calib" +
-                std::to_string(nb_calib) + ".png";
-
-            // sauvegarde l'image dans le dossier calibration_images
-            cv::imwrite(filename, frame);
-
-            // message dans le terminal
-            std::cout << "Image sauvegardee : " << filename << std::endl;
->>>>>>> MG_Calib2
         }
     }
-
-    // libération de la webcam
     cap.release();
-
-    // fermeture de toutes les fenêtres OpenCV
     cv::destroyAllWindows();
-
-    // retourne le nombre total d'images sauvegardées
     return nb_calib;
 }

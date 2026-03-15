@@ -8,47 +8,92 @@
 
 void menu()
 {
-    int choix;
+    cv::Size taille_image = cv::Size(600, 600);
+    int choix = 0;
+    int nb_cam = 0;
+
 
     while (true)
     {
-        std::cout << "\n===== MENU =====\n";
-        std::cout << "1 : Prendre photos\n";
-        std::cout << "2 : Calibration\n";
-        std::cout << "3 : Verification calibration\n";
-        std::cout << "4 : Gestion XML\n";
-        std::cout << "0 : Quitter\n";
+		std::cout << "Que voulez vous faire ? " << std::endl;
+		std::cout << "1. Effectuer une calibration " << std::endl;
+		std::cout << "2. Recuperez une calibration depuis un fichier XML " << std::endl;
+		std::cout << "3. Tester la calibration " << std::endl;
+		std::cout << "Autre. Quittez" << std::endl;
+		std::cin >> choix;
 
-        std::cin >> choix;
+		if (choix == 1) // L'utilisateur veut faire une calibration
+		{
+			int choix_photo = 0;
+			int nb_to_try = 0;
+			std::cout << "Renseignez le nombre de caméras que vous voulez calibrer : " << std::endl;
+			std::cin >> nb_cam;
 
-        if (choix == 1)
-        {
-            capture_cam();                // acquisition images
-        }
 
-        else if (choix == 2)
-        {
-            calibration();                // calibration complète
-        }
+			std::cout << "Voulez vous reprendre des photos ou utilisez celles déja en mémoire ? " << std::endl;
+			std::cout << "1. Reprendre des photos " << std::endl;
+			std::cout << "2. Garder les anciennes " << std::endl;
+			std::cout << "Autre. Quittez" << std::endl;
+			std::cin >> choix_photo;
 
-        else if (choix == 3)
-        {
-            verification_calibration();   // reprojection + erreurs
-        }
+			// Calibration pour les deux cameras
+			for (int cur_cam = 0; cur_cam < nb_cam; cur_cam++)
+			{
+				if (choix_photo == 1) // Oui pour reprendre des photos
+				{
+					//nb_cam--; // on suppose que les cameras sont indexées à partir de 0, donc on soustrait 1 pour le nombre de caméras à calibrer
+					nb_to_try = capture_cam(taille_image, cur_cam);
+				}
+				else if (choix_photo == 2) // Non pour reprendre des photos 
+				{
+					std::cout << "Renseignez le nombre d'images de calibration que vous avez déjà prises : " << std::endl;
+					std::cin >> nb_to_try;
+				}
+				else {
+					std::cout << "Fin du programme." << std::endl;
+					return;
+				}
+				if (nb_to_try < 1) {
+					std::cout << "Nombre d'images de calibration invalide. Fin du programme." << std::endl;
+					return;
+				}
 
-        else if (choix == 4)
-        {
-            gestion_XML();                // lecture XML
-        }
+				// Recuperation de la grille et affichage dans le terminale
+				std::vector<std::vector<cv::Point2f>> calibration_points = get_grid_points(nb_to_try, cur_cam);
+				show_grid_points(calibration_points);
 
-        else if (choix == 0)
-        {
-            break;
-        }
+				calibration(calibration_points, taille_image, cur_cam);
+			}
+		}
 
-        else
-        {
-            std::cout << "Choix invalide\n";
-        }
+		if (choix == 2) // L'utilisateur veut recuperer une calibration depuis un fichier XML
+		{
+
+			std::cout << "Renseignez le nombre de caméras que vous voulez charger : " << std::endl;
+			std::cin >> nb_cam;
+
+			for (int cur_cam = 0; cur_cam < nb_cam; cur_cam++)
+			{
+				std::string filename = "../../../calibration_images/results/calibration_cam" + std::to_string(cur_cam) + "_result.xml";
+				cv::Mat camera_matrix, dist_coeffs;
+				std::vector<cv::Mat> rvecs, tvecs;
+				std::vector<double> perViewErrors;
+				double RMS;
+				cv::Size taille_image;
+				cv::Size pattern_size;
+				float square_size;
+				std::vector<std::vector<cv::Point2f>> image_points;
+
+				get_calibration_from_xml(filename,
+					camera_matrix, dist_coeffs, rvecs, tvecs, perViewErrors, RMS, taille_image, pattern_size, square_size, image_points);
+			}
+		}
+
+		if (choix == 3) // L'utilisateur veut tester la calibration
+		{
+			std::cout << "Renseignez le nombre de caméras que vous voulez verifier : " << std::endl;
+			std::cin >> nb_cam;
+			verif_projection(nb_cam);
+		}
     }
 }

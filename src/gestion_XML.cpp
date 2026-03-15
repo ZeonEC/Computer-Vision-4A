@@ -4,45 +4,142 @@
 #include "gestion_XML.hpp" // header contenant la déclaration de la fonction
 
 
-// ============================================================================
-// Fonction : charger_calibration
-// Rôle : charger les paramètres de calibration d'une caméra depuis un fichier XML
-// Le fichier XML contient généralement :
-//   - la matrice intrinsèque de la caméra
-//   - les coefficients de distorsion
-// ============================================================================
 
-void gestion_XML()
+// Sauvegarde les paramètres de calibration dans un fichier XML
+
+void save_calibration_xml(const std::string& filename,
+	const cv::Mat& camera_matrix,
+	const cv::Mat& dist_coeffs,
+	const std::vector<cv::Mat>& rvecs,
+	const std::vector<cv::Mat>& tvecs,
+	const std::vector<double>& perViewErrors,
+	double RMS,
+	const cv::Size& taille_image,
+	const cv::Size& pattern_size,
+	float square_size,
+	const std::vector<std::vector<cv::Point2f>>& image_points)
 {
-    // chemin du fichier XML contenant les paramètres de calibration
-    std::string filename =
-        "../../../calibration_images/results/calibration_cam1_result.xml";
+	cv::FileStorage fs(filename, cv::FileStorage::WRITE);
 
-    // ouverture du fichier XML en mode lecture avec OpenCV
-    cv::FileStorage fs(filename, cv::FileStorage::READ);
+	if (!fs.isOpened()) {
+		std::cerr << "Erreur : impossible d'ouvrir le fichier XML en ecriture.\n";
+		return;
+	}
 
-    // vérifie si le fichier a été correctement ouvert
-    if (!fs.isOpened())
-    {
-        std::cout << "Impossible d'ouvrir le XML\n";
-        return; // arrêt de la fonction si le fichier n'existe pas
-    }
+	fs << "image_width" << taille_image.width;
+	fs << "image_height" << taille_image.height;
 
-    // matrice intrinsèque de la caméra
-    // elle contient la focale et le centre optique
-    cv::Mat camera_matrix;
+	fs << "pattern_width" << pattern_size.width;
+	fs << "pattern_height" << pattern_size.height;
+	fs << "square_size" << square_size;
 
-    // coefficients de distorsion de la caméra
-    // ils servent à corriger la déformation de l'objectif
-    cv::Mat dist_coeffs;
+	fs << "RMS" << RMS;
+	fs << "camera_matrix" << camera_matrix;
+	fs << "dist_coeffs" << dist_coeffs;
 
-    // lecture des données depuis le fichier XML
-    fs["camera_matrix"] >> camera_matrix;
-    fs["dist_coeffs"] >> dist_coeffs;
+	fs << "rvecs" << "[";
+	for (const auto& r : rvecs) {
+		fs << r;
+	}
+	fs << "]";
 
-    // fermeture du fichier XML
-    fs.release();
+	fs << "tvecs" << "[";
+	for (const auto& t : tvecs) {
+		fs << t;
+	}
+	fs << "]";
 
-    // message indiquant que la calibration a été chargée avec succès
-    std::cout << "Calibration chargee depuis : " << filename << std::endl;
+	fs << "perViewErrors" << "[";
+	for (double e : perViewErrors) {
+		fs << e;
+	}
+	fs << "]";
+
+	fs << "image_points" << "[";
+	for (const auto& view_points : image_points) {
+		fs << view_points;
+	}
+	fs << "]";
+
+	fs.release();
+
+	std::cout << "Calibration sauvegardee dans : " << filename << std::endl;
+}
+
+// CHARGEMENT DES PARAMETRES DE CALIBRATION DEPUIS UN FICHIER XML
+
+void get_calibration_from_xml(const std::string& filename,
+	cv::Mat& camera_matrix,
+	cv::Mat& dist_coeffs,
+	std::vector<cv::Mat>& rvecs,
+	std::vector<cv::Mat>& tvecs,
+	std::vector<double>& perViewErrors,
+	double& RMS,
+	cv::Size& taille_image,
+	cv::Size& pattern_size,
+	float& square_size,
+	std::vector<std::vector<cv::Point2f>>& image_points)
+{
+	// ouverture du fichier en mode lecture
+	cv::FileStorage fs(filename, cv::FileStorage::READ);
+	if (!fs.isOpened()) {
+		std::cerr << "Erreur : impossible d'ouvrir le fichier XML en lecture.\n";
+		return;
+	}
+
+	// Nettoyage des vecteurs avant chargement
+	rvecs.clear();
+	tvecs.clear();
+	perViewErrors.clear();
+	image_points.clear();
+
+	// Recuperation des valeurs depuis le fichier XML
+	fs["image_width"] >> taille_image.width;
+	fs["image_height"] >> taille_image.height;
+
+	fs["pattern_width"] >> pattern_size.width;
+	fs["pattern_height"] >> pattern_size.height;
+	fs["square_size"] >> square_size;
+
+	fs["RMS"] >> RMS;
+	fs["camera_matrix"] >> camera_matrix;
+	fs["dist_coeffs"] >> dist_coeffs;
+
+	// obliger de faire une boucle pour recuperer les rvecs et tvecs 
+	// car ils sont stockés dans un tableau dans le fichier XML
+	// ducoup ça reprend pas sous forme de vecteur de Mat mais de tableau de Mat dans le fichier XML
+	cv::FileNode rvecs_node = fs["rvecs"];
+	for (auto it = rvecs_node.begin(); it != rvecs_node.end(); ++it) {
+		cv::Mat r;
+		*it >> r;
+		rvecs.push_back(r);
+	}
+
+	cv::FileNode tvecs_node = fs["tvecs"];
+	for (auto it = tvecs_node.begin(); it != tvecs_node.end(); ++it) {
+		cv::Mat t;
+		*it >> t;
+		tvecs.push_back(t);
+	}
+
+	cv::FileNode errors_node = fs["perViewErrors"];
+	for (auto it = errors_node.begin(); it != errors_node.end(); ++it) {
+		double e;
+		*it >> e;
+		perViewErrors.push_back(e);
+	}
+
+	// obliger de faire une boucle pour recuperer les image_points
+	// car ils sont stockés comme un tableau de vues dans le fichier XML
+	// chaque vue contient un vecteur de cv::Point2f
+	cv::FileNode image_points_node = fs["image_points"];
+	for (auto it = image_points_node.begin(); it != image_points_node.end(); ++it) {
+		std::vector<cv::Point2f> one_view_points;
+		*it >> one_view_points;
+		image_points.push_back(one_view_points);
+	}
+
+	fs.release(); //fermeture
+
+	std::cout << "Calibration chargee depuis : " << filename << std::endl;
 }

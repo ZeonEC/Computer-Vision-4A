@@ -1,19 +1,14 @@
 #ifndef CALIBRATION_HPP
 #define CALIBRATION_HPP
 
-#include <vector>
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
 #include <opencv2/calib3d.hpp>
 
-std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib);
+std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib, int cur_cam);
+
+void calibration(std::vector<std::vector<cv::Point2f>>& calibration_points, cv::Size& taille_image, int cur_cam);
 
 void show_grid_points(std::vector<std::vector<cv::Point2f>>& images_grid_points);
-
-void calibration(
-    std::vector<std::vector<cv::Point2f>>& calibration_points,
-    cv::Size& taille_image
-);
-
 #endif

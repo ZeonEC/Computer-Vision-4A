@@ -6,15 +6,12 @@
 //#include <opencv2/highgui.hpp>
 //#include <opencv2/improc.hpp>
 
-#include "capture_cam.hpp"
-#include "calibration.hpp"
 #include "menu.hpp"
 
 
 int main() {
-	std::cout << "BRANCHE MG_Calibration" << std::endl;
-	//capture_cam();
-	//calibration();
+	std::cout << "BRANCHE DEV" << std::endl;
+
 	menu();
 	return 0;
 }

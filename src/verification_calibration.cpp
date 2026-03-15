@@ -2,163 +2,128 @@
 #include <opencv2/opencv.hpp> // bibliothèque OpenCV (images, calibration, projection)
 
 #include "verification_calibration.hpp"
+#include "gestion_XML.hpp" // pour récupérer les données de calibration depuis le fichier XML
 
 
-// ============================================================================
-// Fonction : verification_calibration
-// Rôle : vérifier la qualité de la calibration de la caméra
-//
-// Principe :
-//   1. charger la matrice de calibration et les coefficients de distorsion
-//   2. charger les images du damier
-//   3. détecter les coins du damier dans les images
-//   4. reprojeter les points 3D théoriques du damier dans l'image
-//   5. comparer les points reprojetés avec les points détectés
-// ============================================================================
+// verification de la calibration de la caméra en comparant les paramètres obtenus avec calibrateCamera et projectPoint()
 
-void verification_calibration()
-{
+void verif_projection(int& nb_cam) {
 
-    // ------------------------------------------------------------------------
-    // Chargement de la calibration depuis le fichier XML
-    // ------------------------------------------------------------------------
+	for (int cur_cam = 0; cur_cam < nb_cam; cur_cam++)
+	{
+		// Recupération de toutes les valeurs de la calibration depuis le fichier XML
+		std::string filename = "../../../calibration_images/results/calibration_cam" + std::to_string(cur_cam) + "_1_result.xml";
+		cv::Mat camera_matrix, dist_coeffs;
+		std::vector<cv::Mat> rvecs, tvecs;
+		std::vector<double> perViewErrors;
+		double RMS;
+		cv::Size taille_image;
+		cv::Size pattern_size;
+		float square_size;
+		std::vector<std::vector<cv::Point2f>> image_points;
 
-    std::string filename =
-        "../../../calibration_images/results/calibration_cam1_result.xml";
-
-    // ouverture du fichier XML
-    cv::FileStorage fs(filename, cv::FileStorage::READ);
-
-    if (!fs.isOpened())
-    {
-        std::cout << "Impossible d'ouvrir le fichier XML\n";
-        return;
-    }
-
-    // matrice intrinsèque de la caméra
-    cv::Mat camera_matrix;
-
-    // coefficients de distorsion
-    cv::Mat dist_coeffs;
-
-    // lecture des données dans le fichier XML
-    fs["camera_matrix"] >> camera_matrix;
-    fs["dist_coeffs"] >> dist_coeffs;
-
-    // fermeture du fichier
-    fs.release();
-
-    std::cout << "Calibration chargee\n";
+		get_calibration_from_xml(filename,
+			camera_matrix, dist_coeffs, rvecs, tvecs, perViewErrors, RMS, taille_image, pattern_size, square_size, image_points);
 
 
-    // ------------------------------------------------------------------------
-    // Paramètres du damier de calibration
-    // ------------------------------------------------------------------------
+		double fx = camera_matrix.at<double>(0, 0); // fx
+		double fy = camera_matrix.at<double>(1, 1); // fy
+		double focal_diff = std::abs(fx - fy);
 
-    // nombre de coins internes du damier
-    cv::Size pattern_size(7, 9);
-
-    // taille réelle d'un carré du damier (en mm par exemple)
-    float square_size = 20.0f;
-
-
-    // ------------------------------------------------------------------------
-    // Création des points 3D du damier (dans le repère du monde)
-    // ------------------------------------------------------------------------
-
-    std::vector<cv::Point3f> obj;
-
-    for (int i = 0; i < pattern_size.height; i++)
-    {
-        for (int j = 0; j < pattern_size.width; j++)
-        {
-            obj.push_back(
-                cv::Point3f(j * square_size, i * square_size, 0)
-            );
-        }
-    }
+		std::cout << "" << std::endl;
+		std::cout << "==================================================" << std::endl;
+		std::cout << "Verification de la camera : " << cur_cam << std::endl;
+		std::cout << "==================================================" << std::endl;
+		std::cout << "__________________TEST DES FOCALES__________________" << std::endl;
+		std::cout << "Verification de fx et fy (valeurs en pixels): " << std::endl;
+		std::cout << "Difference entre les deux focales : " << focal_diff << std::endl;
 
 
-    // ------------------------------------------------------------------------
-    // Boucle sur toutes les images de calibration
-    // ------------------------------------------------------------------------
+		// verification de cx, cy
 
-    int i = 1;
+		double cx = camera_matrix.at<double>(0, 2); // cx de la matrice intrinsèque
+		double cy = camera_matrix.at<double>(1, 2); // cy de la matrice intrinsèque
+		double center_x = taille_image.width / 2.0; // vrai centre
+		double center_y = taille_image.height / 2.0; // vrai centre
 
-    while (true)
-    {
+		double cx_diff = std::abs(cx - center_x);
+		double cy_diff = std::abs(cy - center_y);
 
-        // construction du nom du fichier image
-        std::string image_path =
-            "../../../calibration_images/calib" +
-            std::to_string(i) + ".png";
+		std::cout << "__________________TEST DU POINT PRINCIPALE__________________" << std::endl;
+		std::cout << "Verification de cx et cy (valeurs en pixels): " << std::endl;
+		std::cout << "Difference entre les deux cx : " << cx_diff << std::endl;
+		std::cout << "Difference entre les deux cy : " << cy_diff << std::endl;
 
-        // chargement de l'image
-        cv::Mat image = cv::imread(image_path);
+		// reprojection
 
-        // si l'image n'existe plus → fin
-        if (image.empty())
-            break;
+		std::cout << "__________________TEST DE REPROJECTION__________________" << std::endl;
+
+		// reconstruction des object_points
+		std::vector<cv::Point3f> obj;
+		std::vector<std::vector<cv::Point3f>> object_points;
+
+		for (int i = 0; i < pattern_size.height; i++)
+		{
+			for (int j = 0; j < pattern_size.width; j++)
+			{
+				obj.push_back(cv::Point3f(i * square_size, j * square_size, 0.0f));
+			}
+		}
+
+		for (size_t i = 0; i < image_points.size(); i++)
+		{
+			object_points.push_back(obj);
+		}
+
+		// comparaison
+		std::cout << "__________________COMPARAISON__________________" << std::endl;
+		std::cout << "RMS lu depuis le XML : " << RMS << std::endl;
+
+		// conclusion
+		std::cout << "__________________CONCLUSION__________________" << std::endl;
+	}
+}
+
+void verif_distortion(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coeffs, cv::Size& taille_image, int cur_cam) {
+
+	// on utilisera R pour la stéréo rectification de l'image
+	// pour l'instant elle peut être vide.
+	cv::Mat R;
+
+	// Le deuxieme argument camera_matrix reste le même que le premier argument, 
+	// car on ne change pas la matrice de la camera pour la stéréo rectification ou en utilisant getOptimalNewCameraMatrix
+	// a chanegr plus tard si on veut faire de la stéréo
+
+	int m1type = CV_32FC1; // type de la map pour la stéréo rectification
+	cv::Mat  map1, map2; // maps pour la stéréo rectification
+
+	// L'utilisation de initUndistortRectifyMap et remap est supposé plus performante.
+	// cela permet de faire le calcul de la correction de distorsion une seule fois 
+	// et de l'appliquer à toutes les images de calibration, au lieu de recalculer la correction pour chaque image 
+	// avec undistort.
+	cv::initUndistortRectifyMap(camera_matrix, dist_coeffs, R, camera_matrix, taille_image, m1type, map1, map2);
+
+	for (int i = 1; i < nb_to_try + 1; i++) {
+
+		std::string original_FILENAME = "../../../calibration_images/calib_cam" + std::to_string(cur_cam) + "_" + std::to_string(i) + ".png";
+		std::string original_WINDOWNAME = "Calibration de l'image numero : " + std::to_string(i);
+		cv::Mat original_image = cv::imread(original_FILENAME);
+		cv::imshow(original_WINDOWNAME, original_image);
 
 
-        // --------------------------------------------------------------------
-        // Détection des coins du damier dans l'image
-        // --------------------------------------------------------------------
+		// on undistord l'image de calibration en utilisant les paramètres de calibration obtenus
+		// transforme ces paramètres en correspondance pixel et applique la correction de distorsion à l'image de calibration
+		//
+		// Originale : si on veut pas s'embeterinitUndistortRectifyMap et remap
+		// cv::Mat undistorted_image;
+		//cv::undistort(original_image, undistorted_image, camera_matrix, dist_coeffs);
 
-        std::vector<cv::Point2f> corners;
+		cv::Mat undistorted_image;
+		cv::remap(original_image, undistorted_image, map1, map2, cv::INTER_LINEAR);
+		cv::imshow("Image undistordue de la calibration numero : " + std::to_string(i), undistorted_image);
 
-        bool found =
-            cv::findChessboardCorners(image, pattern_size, corners);
-
-
-        if (found)
-        {
-
-            // ----------------------------------------------------------------
-            // Reprojection des points 3D dans l'image
-            // ----------------------------------------------------------------
-
-            std::vector<cv::Point2f> reprojected;
-
-            // vecteur rotation et translation (initialisés à zéro ici)
-            cv::Mat rvec = cv::Mat::zeros(3, 1, CV_64F);
-            cv::Mat tvec = cv::Mat::zeros(3, 1, CV_64F);
-
-
-            // projection des points 3D vers l'image
-            cv::projectPoints(
-                obj,            // points 3D du damier
-                rvec,           // rotation
-                tvec,           // translation
-                camera_matrix,  // matrice caméra
-                dist_coeffs,    // distorsion
-                reprojected     // points projetés
-            );
-
-
-            // ----------------------------------------------------------------
-            // Affichage visuel de la comparaison
-            // ----------------------------------------------------------------
-
-            for (size_t k = 0; k < corners.size(); k++)
-            {
-                // coins détectés → vert
-                cv::circle(image, corners[k], 4, { 0,255,0 }, -1);
-
-                // coins reprojetés → rouge
-                cv::circle(image, reprojected[k], 4, { 0,0,255 }, -1);
-            }
-
-            // affichage de l'image avec les deux types de points
-            cv::imshow("Verification calibration", image);
-
-            // attendre une touche
-            cv::waitKey(0);
-        }
-
-        i++;
-    }
-
-    // fermeture des fenêtres OpenCV
-    cv::destroyAllWindows();
+		cv::waitKey(0);
+		cv::destroyAllWindows();
+	}
+	cv::destroyAllWindows();
 }
