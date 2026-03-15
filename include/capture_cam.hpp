@@ -6,3 +6,6 @@
 void capture_cam();
 
 #endif
+// fonction qui capture des images depuis la webcam
+// retourne le nombre d'images sauvegardées
+int capture_cam(cv::Size taille_image);

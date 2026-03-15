@@ -4,7 +4,7 @@
 std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib) {
 
 	// on cree une vecteur de points pour la calibration
-	std::vector<cv::Point2f> corners;
+// ============================================================================
 	// on cree le tableau de vecteur pour avoir toutes les informations dans une variable
 	std::vector<std::vector<cv::Point2f>> images_grid_points;
 	// on alloue la place dans le vecteur 
