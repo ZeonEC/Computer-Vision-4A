@@ -13,6 +13,9 @@
 
 int capture_cam(cv::Size taille_image)
 {
+
+    cv::Size taille_image(600, 600);
+
     // ouverture de la webcam (index 0 = première caméra du PC)
     // CAP_DSHOW = backend DirectShow (plus stable sous Windows)
     cv::VideoCapture cap(0, cv::CAP_DSHOW);

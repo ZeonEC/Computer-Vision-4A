@@ -1,7 +1,7 @@
 #include <iostream>           // bibliothèque pour afficher des messages dans le terminal
 #include <opencv2/opencv.hpp> // bibliothèque OpenCV (gestion fichiers, matrices, vision)
 
-#include "charger_calibration.hpp" // header contenant la déclaration de la fonction
+#include "gestion_XML.hpp" // header contenant la déclaration de la fonction
 
 
 // ============================================================================
@@ -12,7 +12,7 @@
 //   - les coefficients de distorsion
 // ============================================================================
 
-void charger_calibration()
+void gestion_XML()
 {
     // chemin du fichier XML contenant les paramètres de calibration
     std::string filename =

@@ -102,22 +102,18 @@ void show_grid_points(
 //   taille_image → taille des images utilisées
 // ============================================================================
 
-void calibration(
-    std::vector<std::vector<cv::Point2f>>& calibration_points,
-    cv::Size& taille_image)
+void calibration()
 {
-    // message indiquant que la calibration commence
-    std::cout << "Calibration lancee..." << std::endl;
+    cv::Size taille_image(600, 600);
 
-    // affiche le nombre d'images utilisées pour la calibration
-    std::cout << "Nombre d'images utilisees : "
-        << calibration_points.size()
-        << std::endl;
+    int nb;
 
-    // NOTE :
-    // Ici on devrait normalement appeler la fonction OpenCV :
-    // cv::calibrateCamera()
-    // pour calculer :
-    // - la matrice intrinsèque de la caméra
-    // - les coefficients de distorsion
+    std::cout << "Nombre d'images calibration : ";
+    std::cin >> nb;
+
+    auto pts = get_grid_points(nb);
+
+    show_grid_points(pts);
+
+    calibration(pts, taille_image);
 }

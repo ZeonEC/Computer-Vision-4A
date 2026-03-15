@@ -36,8 +36,8 @@ set(SOURCES
     src/menu.cpp
     src/capture_cam.cpp
     src/calibration.cpp
-    src/charger_calibration.cpp
     src/verification_calibration.cpp
+    src/gestion_XML.cpp
     
 )
 
