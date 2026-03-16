@@ -4,15 +4,33 @@
 #include "verification_calibration.hpp"
 #include "gestion_XML.hpp" // pour récupérer les données de calibration depuis le fichier XML
 
+// Test log dans fichier texte :
+#include <fstream>
 
 // verification de la calibration de la caméra en comparant les paramètres obtenus avec calibrateCamera et projectPoint()
 
 void verif_projection(int& nb_cam) {
 
+	//-------------------------------------
+	/// Mise a dispo dans un fichier texte
+	std::ofstream logfile("../../../calibration_images/results/verification_projection.txt");
+
+	if (!logfile.is_open()) {
+		std::cout << "Impossible de creer le fichier log" << std::endl;
+		return;
+	}
+	// sauvegarde du buffer console
+	std::streambuf* cout_buffer = std::cout.rdbuf();
+	// redirection vers fichier
+	std::cout.rdbuf(logfile.rdbuf());
+	//-------------------------------------
+
+
+
 	for (int cur_cam = 0; cur_cam < nb_cam; cur_cam++)
 	{
 		// Recupération de toutes les valeurs de la calibration depuis le fichier XML
-		std::string filename = "../../../calibration_images/results/calibration_cam" + std::to_string(cur_cam) + "_1_result.xml";
+		std::string filename = "../../../calibration_images/results/calibration_cam" + std::to_string(cur_cam) + "_result.xml";
 		cv::Mat camera_matrix, dist_coeffs;
 		std::vector<cv::Mat> rvecs, tvecs;
 		std::vector<double> perViewErrors;
@@ -77,6 +95,7 @@ void verif_projection(int& nb_cam) {
 
 		// On crée un nouveau tableau de points projetés pour chaque image de calibration
 		std::vector<cv::Point2f> projected_points;
+		double rms_error = 0.0;
 
 		for (int i = 0; i < image_points.size(); i++)
 		{
@@ -85,17 +104,32 @@ void verif_projection(int& nb_cam) {
 				cv::projectPoints(object_points[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs, projected_points);
 				double error_x = std::abs(image_points[i][j].x - projected_points[j].x);
 				double error_y = std::abs(image_points[i][j].y - projected_points[j].y);
-				
+
 				std::cout << "Erreur de reprojection pour l'image en X " << i + 1 << " : " << error_x << std::endl;
 				std::cout << "Erreur de reprojection pour l'image en Y " << i + 1 << " : " << error_x << std::endl;
+
+				rms_error += error_x * error_x + error_y * error_y;
 			}
 		}
 		// comparaison
+		rms_error = std::sqrt(rms_error / (image_points.size() * pattern_size.width * pattern_size.height));
+		double rms_compare = std::abs(RMS - rms_error);
+
 		std::cout << "__________________COMPARAISON__________________" << std::endl;
 		std::cout << "RMS lu depuis le XML : " << RMS << std::endl;
+		std::cout << "RMS calculé à partir de projectPoints : " << rms_error << std::endl;
+		std::cout << "Difference entre les deux RMS : " << rms_compare << std::endl;
 
 		// conclusion
 		std::cout << "__________________CONCLUSION__________________" << std::endl;
+
+
+		//-------------------------------------
+		/// Mise a dispo dasn un fichier texte
+		// restaurer la console
+		std::cout.rdbuf(cout_buffer);
+		logfile.close();
+		//-------------------------------------
 	}
 }
 
