@@ -1,164 +1,156 @@
-#include <iostream>           // pour afficher des messages dans le terminal
-#include <opencv2/opencv.hpp> // bibliothèque OpenCV (images, calibration, projection)
+#include <iostream>
+#include <opencv2/opencv.hpp>
 
 #include "verification_calibration.hpp"
 
+using namespace std;
 
-// ============================================================================
-// Fonction : verification_calibration
-// Rôle : vérifier la qualité de la calibration de la caméra
-//
-// Principe :
-//   1. charger la matrice de calibration et les coefficients de distorsion
-//   2. charger les images du damier
-//   3. détecter les coins du damier dans les images
-//   4. reprojeter les points 3D théoriques du damier dans l'image
-//   5. comparer les points reprojetés avec les points détectés
-// ============================================================================
 
+// dessine une croix sur l'image
+void drawCross(cv::Mat& img, cv::Point2f p, cv::Scalar color)
+{
+    int size = 6;
+
+    cv::line(img,
+        cv::Point(p.x - size, p.y - size),
+        cv::Point(p.x + size, p.y + size),
+        color, 2);
+
+    cv::line(img,
+        cv::Point(p.x - size, p.y + size),
+        cv::Point(p.x + size, p.y - size),
+        color, 2);
+}
+
+
+// verification de la calibration
 void verification_calibration()
 {
-
-    // ------------------------------------------------------------------------
-    // Chargement de la calibration depuis le fichier XML
-    // ------------------------------------------------------------------------
-
-    std::string filename =
+    // charger calibration
+    string filename =
         "../../../calibration_images/results/calibration_cam1_result.xml";
 
-    // ouverture du fichier XML
     cv::FileStorage fs(filename, cv::FileStorage::READ);
 
     if (!fs.isOpened())
     {
-        std::cout << "Impossible d'ouvrir le fichier XML\n";
+        cout << "Impossible d'ouvrir le fichier XML\n";
         return;
     }
 
-    // matrice intrinsèque de la caméra
     cv::Mat camera_matrix;
-
-    // coefficients de distorsion
     cv::Mat dist_coeffs;
 
-    // lecture des données dans le fichier XML
     fs["camera_matrix"] >> camera_matrix;
     fs["dist_coeffs"] >> dist_coeffs;
 
-    // fermeture du fichier
     fs.release();
 
-    std::cout << "Calibration chargee\n";
+    cout << "Calibration chargee\n";
 
 
-    // ------------------------------------------------------------------------
-    // Paramètres du damier de calibration
-    // ------------------------------------------------------------------------
-
-    // nombre de coins internes du damier
+    // damier
     cv::Size pattern_size(7, 9);
-
-    // taille réelle d'un carré du damier (en mm par exemple)
     float square_size = 20.0f;
 
 
-    // ------------------------------------------------------------------------
-    // Création des points 3D du damier (dans le repère du monde)
-    // ------------------------------------------------------------------------
-
-    std::vector<cv::Point3f> obj;
+    // points 3D
+    vector<cv::Point3f> obj;
 
     for (int i = 0; i < pattern_size.height; i++)
     {
         for (int j = 0; j < pattern_size.width; j++)
         {
             obj.push_back(
-                cv::Point3f(j * square_size, i * square_size, 0)
-            );
+                cv::Point3f(
+                    j * square_size,
+                    i * square_size,
+                    0));
         }
     }
 
 
-    // ------------------------------------------------------------------------
-    // Boucle sur toutes les images de calibration
-    // ------------------------------------------------------------------------
+    // charger image
+    string image_path =
+        "../../../calibration_images/calib1.png";
 
-    int i = 1;
+    cv::Mat image = cv::imread(image_path);
 
-    while (true)
+    if (image.empty())
     {
-
-        // construction du nom du fichier image
-        std::string image_path =
-            "../../../calibration_images/calib" +
-            std::to_string(i) + ".png";
-
-        // chargement de l'image
-        cv::Mat image = cv::imread(image_path);
-
-        // si l'image n'existe plus → fin
-        if (image.empty())
-            break;
-
-
-        // --------------------------------------------------------------------
-        // Détection des coins du damier dans l'image
-        // --------------------------------------------------------------------
-
-        std::vector<cv::Point2f> corners;
-
-        bool found =
-            cv::findChessboardCorners(image, pattern_size, corners);
-
-
-        if (found)
-        {
-
-            // ----------------------------------------------------------------
-            // Reprojection des points 3D dans l'image
-            // ----------------------------------------------------------------
-
-            std::vector<cv::Point2f> reprojected;
-
-            // vecteur rotation et translation (initialisés à zéro ici)
-            cv::Mat rvec = cv::Mat::zeros(3, 1, CV_64F);
-            cv::Mat tvec = cv::Mat::zeros(3, 1, CV_64F);
-
-
-            // projection des points 3D vers l'image
-            cv::projectPoints(
-                obj,            // points 3D du damier
-                rvec,           // rotation
-                tvec,           // translation
-                camera_matrix,  // matrice caméra
-                dist_coeffs,    // distorsion
-                reprojected     // points projetés
-            );
-
-
-            // ----------------------------------------------------------------
-            // Affichage visuel de la comparaison
-            // ----------------------------------------------------------------
-
-            for (size_t k = 0; k < corners.size(); k++)
-            {
-                // coins détectés → vert
-                cv::circle(image, corners[k], 4, { 0,255,0 }, -1);
-
-                // coins reprojetés → rouge
-                cv::circle(image, reprojected[k], 4, { 0,0,255 }, -1);
-            }
-
-            // affichage de l'image avec les deux types de points
-            cv::imshow("Verification calibration", image);
-
-            // attendre une touche
-            cv::waitKey(0);
-        }
-
-        i++;
+        cout << "Impossible de charger l'image\n";
+        return;
     }
 
-    // fermeture des fenêtres OpenCV
+
+    // detecter coins
+    vector<cv::Point2f> corners;
+
+    bool found =
+        cv::findChessboardCorners(
+            image,
+            pattern_size,
+            corners);
+
+    if (!found)
+    {
+        cout << "Damier non detecte\n";
+        return;
+    }
+
+    cout << "Damier detecte\n";
+
+
+    // pose du damier
+    cv::Mat rvec, tvec;
+
+    cv::solvePnP(
+        obj,
+        corners,
+        camera_matrix,
+        dist_coeffs,
+        rvec,
+        tvec);
+
+
+    // reprojection
+    vector<cv::Point2f> projected;
+
+    cv::projectPoints(
+        obj,
+        rvec,
+        tvec,
+        camera_matrix,
+        dist_coeffs,
+        projected);
+
+
+    // dessin
+    for (size_t i = 0; i < corners.size(); i++)
+    {
+        drawCross(image, corners[i], cv::Scalar(0, 255, 0)); // détecté
+        drawCross(image, projected[i], cv::Scalar(0, 0, 255)); // reprojeté
+    }
+
+
+    // erreur reprojection
+    double error = 0;
+
+    for (size_t i = 0; i < corners.size(); i++)
+    {
+        error += cv::norm(corners[i] - projected[i]);
+    }
+
+    error /= corners.size();
+
+    cout << "Erreur moyenne = "
+        << error << " pixels\n";
+
+
+    // affichage
+    cv::imshow("Verification calibration", image);
+
+    cv::waitKey(0);
+
     cv::destroyAllWindows();
 }
