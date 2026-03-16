@@ -10,7 +10,7 @@
 
 
 int main() {
-	std::cout << "BRANCHE DEV" << std::endl;
+	std::cout << "BRANCHE EC_calib2" << std::endl;
 
 	menu();
 	return 0;
