@@ -1,48 +1,38 @@
-#include <iostream>           // bibliothèque pour afficher des messages dans le terminal
-#include <opencv2/opencv.hpp> // bibliothèque OpenCV (gestion fichiers, matrices, vision)
+#include <iostream>
+#include <opencv2/opencv.hpp>
 
-#include "gestion_XML.hpp" // header contenant la déclaration de la fonction
+#include "gestion_XML.hpp"
 
 
-// ============================================================================
-// Fonction : charger_calibration
-// Rôle : charger les paramètres de calibration d'une caméra depuis un fichier XML
-// Le fichier XML contient généralement :
-//   - la matrice intrinsèque de la caméra
-//   - les coefficients de distorsion
-// ============================================================================
-
+// charge les paramètres de calibration depuis le fichier XML
 void gestion_XML()
 {
-    // chemin du fichier XML contenant les paramètres de calibration
+    // chemin du fichier
     std::string filename =
         "../../../calibration_images/results/calibration_cam1_result.xml";
 
-    // ouverture du fichier XML en mode lecture avec OpenCV
+    // ouverture du fichier XML
     cv::FileStorage fs(filename, cv::FileStorage::READ);
 
-    // vérifie si le fichier a été correctement ouvert
     if (!fs.isOpened())
     {
         std::cout << "Impossible d'ouvrir le XML\n";
-        return; // arrêt de la fonction si le fichier n'existe pas
+        return;
     }
 
-    // matrice intrinsèque de la caméra
-    // elle contient la focale et le centre optique
+    // paramètres de calibration
     cv::Mat camera_matrix;
-
-    // coefficients de distorsion de la caméra
-    // ils servent à corriger la déformation de l'objectif
     cv::Mat dist_coeffs;
 
-    // lecture des données depuis le fichier XML
+    // lecture des données
     fs["camera_matrix"] >> camera_matrix;
     fs["dist_coeffs"] >> dist_coeffs;
 
-    // fermeture du fichier XML
     fs.release();
 
-    // message indiquant que la calibration a été chargée avec succès
-    std::cout << "Calibration chargee depuis : " << filename << std::endl;
+    std::cout << "Calibration chargee : " << filename << std::endl;
+
+    // affichage simple
+    std::cout << "\nCamera matrix :\n" << camera_matrix << std::endl;
+    std::cout << "\nDistortion coefficients :\n" << dist_coeffs << std::endl;
 }
