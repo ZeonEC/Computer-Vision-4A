@@ -19,7 +19,7 @@ std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib, int cur_cam)
 	for (int i = 1; i < nb_calib + 1; i++)
 	{
 		//    ../../../calibration_images/calib1.jpg
-		std::string FILENAME = "../../../calibration_images/calib_cam" + std::to_string(cur_cam + 1) + "_" + std::to_string(i) + ".png";
+		std::string FILENAME = "../../../calibration_images/calib_cam" + std::to_string(cur_cam) + "_" + std::to_string(i) + ".png";
 		std::string WINDOWNAME = "Calibration de l'image numero : " + std::to_string(i);
 		// Charger une image de calibration
 		cv::Mat calib_image = cv::imread(FILENAME);

@@ -66,7 +66,7 @@ void menu()
 			}
 		}
 
-		if (choix == 2) // L'utilisateur veut recuperer une calibration depuis un fichier XML
+		else if (choix == 2) // L'utilisateur veut recuperer une calibration depuis un fichier XML
 		{
 
 			std::cout << "Renseignez le nombre de caméras que vous voulez charger : " << std::endl;
@@ -89,7 +89,7 @@ void menu()
 			}
 		}
 
-		if (choix == 3) // L'utilisateur veut tester la calibration
+		else if (choix == 3) // L'utilisateur veut tester la calibration
 		{
 			std::cout << "Renseignez le nombre de caméras que vous voulez verifier : " << std::endl;
 			std::cin >> nb_cam;
