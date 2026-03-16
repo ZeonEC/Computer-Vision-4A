@@ -75,6 +75,21 @@ void verif_projection(int& nb_cam) {
 			object_points.push_back(obj);
 		}
 
+		// On crée un nouveau tableau de points projetés pour chaque image de calibration
+		std::vector<cv::Point2f> projected_points;
+
+		for (int i = 0; i < image_points.size(); i++)
+		{
+			for (int j = 0; j < image_points[i].size(); j++)
+			{
+				cv::projectPoints(object_points[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs, projected_points);
+				double error_x = std::abs(image_points[i][j].x - projected_points[j].x);
+				double error_y = std::abs(image_points[i][j].y - projected_points[j].y);
+				
+				std::cout << "Erreur de reprojection pour l'image en X " << i + 1 << " : " << error_x << std::endl;
+				std::cout << "Erreur de reprojection pour l'image en Y " << i + 1 << " : " << error_x << std::endl;
+			}
+		}
 		// comparaison
 		std::cout << "__________________COMPARAISON__________________" << std::endl;
 		std::cout << "RMS lu depuis le XML : " << RMS << std::endl;

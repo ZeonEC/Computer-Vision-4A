@@ -95,5 +95,10 @@ void menu()
 			std::cin >> nb_cam;
 			verif_projection(nb_cam);
 		}
+
+		else {
+			std::cout << "Arret programme" << std::endl;
+			return;
+		}
     }
 }
