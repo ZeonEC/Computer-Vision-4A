@@ -38,7 +38,8 @@ set(SOURCES
     src/calibration.cpp
     src/verification_calibration.cpp
     src/gestion_XML.cpp
-    
+    src/stereo_calibration.cpp
+    src/stereo_capture_cam.cpp    
 )
 
 # -------------------------------------------------
