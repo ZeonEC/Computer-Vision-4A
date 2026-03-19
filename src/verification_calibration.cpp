@@ -120,7 +120,7 @@ void verif_projection(int& nb_cam) {
 				cv::projectPoints(object_points[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs, projected_points);
 
 				// ----------- AJOUT (affichage image) -----------
-				std::string image_filename = "../../../calibration_images/calib" + std::to_string(i + 1) + ".png";
+				std::string image_filename = "../../../calibration_images/calib_cam" + std::to_string(cur_cam) + "_" + std::to_string(i + 1) + ".png";
 				cv::Mat calib_image = cv::imread(image_filename);
 
 				if (calib_image.empty()) {
