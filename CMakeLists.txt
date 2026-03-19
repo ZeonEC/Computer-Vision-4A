@@ -25,6 +25,8 @@ set(SOURCES
     src/calibration.cpp
     src/verification_calibration.cpp
     src/stereo_calibration.cpp
+    src/stereo_capture_cam.cpp 
+    src/verif_stereo_calib.cpp
 )
 
 add_executable(main ${SOURCES})
