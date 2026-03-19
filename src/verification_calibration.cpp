@@ -7,6 +7,22 @@
 // Test log dans fichier texte :
 #include <fstream>
 
+// petite croix pour voir la différence entre les points
+void drawCross(cv::Mat& image, cv::Point2f pt, cv::Scalar color)
+{
+	int size = 2;
+
+	cv::line(image,
+		cv::Point(pt.x - size, pt.y - size),
+		cv::Point(pt.x + size, pt.y + size),
+		color, 1);
+
+	cv::line(image,
+		cv::Point(pt.x - size, pt.y + size),
+		cv::Point(pt.x + size, pt.y - size),
+		color, 1);
+}
+
 // verification de la calibration de la caméra en comparant les paramètres obtenus avec calibrateCamera et projectPoint()
 
 void verif_projection(int& nb_cam) {
@@ -102,14 +118,36 @@ void verif_projection(int& nb_cam) {
 			for (int j = 0; j < image_points[i].size(); j++)
 			{
 				cv::projectPoints(object_points[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs, projected_points);
+
+				// ----------- AJOUT (affichage image) -----------
+				std::string image_filename = "../../../calibration_images/calib" + std::to_string(i + 1) + ".png";
+				cv::Mat calib_image = cv::imread(image_filename);
+
+				if (calib_image.empty()) {
+					std::cout << "Impossible de charger l'image : " << image_filename << std::endl;
+					continue;
+				}
+				// ----------------------------------------------
+
 				double error_x = std::abs(image_points[i][j].x - projected_points[j].x);
 				double error_y = std::abs(image_points[i][j].y - projected_points[j].y);
 
 				std::cout << "Erreur de reprojection pour l'image en X " << i + 1 << " : " << error_x << std::endl;
-				std::cout << "Erreur de reprojection pour l'image en Y " << i + 1 << " : " << error_x << std::endl;
+				std::cout << "Erreur de reprojection pour l'image en Y " << i + 1 << " : " << error_y << std::endl;
 
 				rms_error += error_x * error_x + error_y * error_y;
+
+				// ----------- AJOUT (croix) -----------
+				drawCross(calib_image, image_points[i][j], cv::Scalar(0, 255, 0)); // vert
+				drawCross(calib_image, projected_points[j], cv::Scalar(0, 0, 255)); // rouge
+
+				cv::imshow("Verification calibration", calib_image);
+				cv::waitKey(1);
+				// ------------------------------------
 			}
+
+			cv::waitKey(0);
+			cv::destroyAllWindows();
 		}
 		// comparaison
 		rms_error = std::sqrt(rms_error / (image_points.size() * pattern_size.width * pattern_size.height));
@@ -122,34 +160,30 @@ void verif_projection(int& nb_cam) {
 
 		// conclusion
 		std::cout << "__________________CONCLUSION__________________" << std::endl;
-
-
-		//-------------------------------------
-		/// Mise a dispo dasn un fichier texte
-		// restaurer la console
-		std::cout.rdbuf(cout_buffer);
-		logfile.close();
-		//-------------------------------------
+		std::cout << "Verification terminee pour la camera : " << cur_cam << std::endl;
 	}
+
+	//-------------------------------------
+	/// Mise a dispo dasn un fichier texte
+	// restaurer la console
+	std::cout.rdbuf(cout_buffer);
+	logfile.close();
+	//-------------------------------------
+}
+
+void verification_calibration()
+{
+	int nb_cam = 1;
+	verif_projection(nb_cam);
 }
 
 void verif_distortion(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coeffs, cv::Size& taille_image, int cur_cam) {
 
-	// on utilisera R pour la stéréo rectification de l'image
-	// pour l'instant elle peut être vide.
 	cv::Mat R;
 
-	// Le deuxieme argument camera_matrix reste le même que le premier argument, 
-	// car on ne change pas la matrice de la camera pour la stéréo rectification ou en utilisant getOptimalNewCameraMatrix
-	// a chanegr plus tard si on veut faire de la stéréo
+	int m1type = CV_32FC1;
+	cv::Mat  map1, map2;
 
-	int m1type = CV_32FC1; // type de la map pour la stéréo rectification
-	cv::Mat  map1, map2; // maps pour la stéréo rectification
-
-	// L'utilisation de initUndistortRectifyMap et remap est supposé plus performante.
-	// cela permet de faire le calcul de la correction de distorsion une seule fois 
-	// et de l'appliquer à toutes les images de calibration, au lieu de recalculer la correction pour chaque image 
-	// avec undistort.
 	cv::initUndistortRectifyMap(camera_matrix, dist_coeffs, R, camera_matrix, taille_image, m1type, map1, map2);
 
 	for (int i = 1; i < nb_to_try + 1; i++) {
@@ -159,20 +193,12 @@ void verif_distortion(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coeffs,
 		cv::Mat original_image = cv::imread(original_FILENAME);
 		cv::imshow(original_WINDOWNAME, original_image);
 
-
-		// on undistord l'image de calibration en utilisant les paramètres de calibration obtenus
-		// transforme ces paramètres en correspondance pixel et applique la correction de distorsion à l'image de calibration
-		//
-		// Originale : si on veut pas s'embeterinitUndistortRectifyMap et remap
-		// cv::Mat undistorted_image;
-		//cv::undistort(original_image, undistorted_image, camera_matrix, dist_coeffs);
-
 		cv::Mat undistorted_image;
 		cv::remap(original_image, undistorted_image, map1, map2, cv::INTER_LINEAR);
 		cv::imshow("Image undistordue de la calibration numero : " + std::to_string(i), undistorted_image);
 
 		cv::waitKey(0);
-		cv::destroyAllWindows();	
+		cv::destroyAllWindows();
 	}
 	cv::destroyAllWindows();
 }
