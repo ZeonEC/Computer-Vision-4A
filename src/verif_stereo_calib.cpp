@@ -59,121 +59,136 @@ void drawCross(cv::Mat& image, cv::Point2f pt, cv::Scalar color)
 // =======================
 void verif_projection(int& nb_cam)
 {
-    std::ofstream logfile("../../../calibration_images/results/verification_projection.txt");
-
-    if (!logfile.is_open()) {
-        std::cout << "Impossible de creer le fichier log" << std::endl;
+    if (nb_cam < 2)
+    {
+        std::cout << "Mode stereo requis (2 cameras)" << std::endl;
         return;
     }
 
-    std::streambuf* cout_buffer = std::cout.rdbuf();
-    std::cout.rdbuf(logfile.rdbuf());
+    // ===== LOAD XML CAM 0 =====
+    cv::Mat camera_matrix0, dist_coeffs0;
+    std::vector<cv::Mat> rvecs0, tvecs0;
+    std::vector<double> perViewErrors0;
+    double RMS0;
+    cv::Size taille_image0, pattern_size0;
+    float square_size0;
+    std::vector<std::vector<cv::Point2f>> image_points0;
 
-    for (int cur_cam = 0; cur_cam < nb_cam; cur_cam++)
+    get_calibration_from_xml(
+        "../../../calibration_images/results/calibration_cam0_result.xml",
+        camera_matrix0, dist_coeffs0, rvecs0, tvecs0,
+        perViewErrors0, RMS0, taille_image0,
+        pattern_size0, square_size0, image_points0
+    );
+
+    // ===== LOAD XML CAM 1 =====
+    cv::Mat camera_matrix1, dist_coeffs1;
+    std::vector<cv::Mat> rvecs1, tvecs1;
+    std::vector<double> perViewErrors1;
+    double RMS1;
+    cv::Size taille_image1, pattern_size1;
+    float square_size1;
+    std::vector<std::vector<cv::Point2f>> image_points1;
+
+    get_calibration_from_xml(
+        "../../../calibration_images/results/calibration_cam1_result.xml",
+        camera_matrix1, dist_coeffs1, rvecs1, tvecs1,
+        perViewErrors1, RMS1, taille_image1,
+        pattern_size1, square_size1, image_points1
+    );
+
+    // ===== OBJECT POINTS =====
+    std::vector<cv::Point3f> obj;
+    std::vector<std::vector<cv::Point3f>> object_points;
+
+    for (int i = 0; i < pattern_size0.height; i++)
+        for (int j = 0; j < pattern_size0.width; j++)
+            obj.push_back(cv::Point3f(i * square_size0, j * square_size0, 0.0f));
+
+    for (size_t i = 0; i < image_points0.size(); i++)
+        object_points.push_back(obj);
+
+    // ===== LOOP =====
+    for (int i = 0; i < image_points0.size(); i++)
     {
-        std::string filename =
-            "../../../calibration_images/results/calibration_cam"
-            + std::to_string(cur_cam) + "_result.xml";
+        std::string img0_name =
+            "../../../calibration_images/calib_cam0_" + std::to_string(i + 1) + ".png";
 
-        cv::Mat camera_matrix, dist_coeffs;
-        std::vector<cv::Mat> rvecs, tvecs;
-        std::vector<double> perViewErrors;
-        double RMS;
-        cv::Size taille_image;
-        cv::Size pattern_size;
-        float square_size;
-        std::vector<std::vector<cv::Point2f>> image_points;
+        std::string img1_name =
+            "../../../calibration_images/calib_cam1_" + std::to_string(i + 1) + ".png";
 
-        get_calibration_from_xml(filename,
-            camera_matrix, dist_coeffs, rvecs, tvecs,
-            perViewErrors, RMS, taille_image,
-            pattern_size, square_size, image_points);
+        cv::Mat img0 = cv::imread(img0_name);
+        cv::Mat img1 = cv::imread(img1_name);
 
-        std::vector<cv::Point3f> obj;
-        std::vector<std::vector<cv::Point3f>> object_points;
-
-        for (int i = 0; i < pattern_size.height; i++)
-            for (int j = 0; j < pattern_size.width; j++)
-                obj.push_back(cv::Point3f(i * square_size, j * square_size, 0.0f));
-
-        for (size_t i = 0; i < image_points.size(); i++)
-            object_points.push_back(obj);
-
-        std::vector<cv::Point2f> projected_points;
-
-        for (int i = 0; i < image_points.size(); i++)
+        if (img0.empty() || img1.empty())
         {
-            std::string image_filename =
-                "../../../calibration_images/calib_cam"
-                + std::to_string(cur_cam) + "_"
-                + std::to_string(i + 1) + ".png";
-
-            cv::Mat calib_image = cv::imread(image_filename);
-
-            if (calib_image.empty()) {
-                std::cout << "Impossible de charger : " << image_filename << std::endl;
-                continue;
-            }
-
-            cv::projectPoints(object_points[i], rvecs[i], tvecs[i],
-                camera_matrix, dist_coeffs, projected_points);
-
-            for (int j = 0; j < image_points[i].size(); j++)
-            {
-                drawCross(calib_image, image_points[i][j], cv::Scalar(0, 255, 0)); // vert = points detectes
-                drawCross(calib_image, projected_points[j], cv::Scalar(0, 0, 255)); // rouge = points projetes
-                //drawCross(calib_image, image_points[i][j], cv::Scalar(0, 255, 0)); // vert = points detectes
-            }
-
-            // =======================
-            // AFFICHAGE AVEC ZOOM
-            // =======================
-            image_original = calib_image.clone();
-            zoom = 1.0;
-
-            cv::namedWindow("Verification calibration", cv::WINDOW_NORMAL);
-            cv::setMouseCallback("Verification calibration", onMouse);
-
-            while (true)
-            {
-                cv::Mat display;
-
-                int w = image_original.cols;
-                int h = image_original.rows;
-
-                int new_w = w / zoom;
-                int new_h = h / zoom;
-
-                int x = mouse_x - new_w / 2;
-                int y = mouse_y - new_h / 2;
-
-                x = std::max(0, std::min(x, w - new_w));
-                y = std::max(0, std::min(y, h - new_h));
-
-                cv::Rect roi(x, y, new_w, new_h);
-                cv::Mat cropped = image_original(roi);
-
-                cv::resize(cropped, display, cv::Size(w, h));
-
-                cv::imshow("Verification calibration", display);
-
-                int key = cv::waitKey(30);
-
-                if (key == 27) return; // ESC → quitter
-
-                if (key == 'n') break; // passer à l’image suivante
-            }
-
-
-
-
-            cv::destroyAllWindows();
+            std::cout << "Erreur chargement image " << i << std::endl;
+            continue;
         }
-    }
 
-    std::cout.rdbuf(cout_buffer);
-    logfile.close();
+        // ===== PROJECTION =====
+        std::vector<cv::Point2f> proj0, proj1;
+
+        cv::projectPoints(object_points[i], rvecs0[i], tvecs0[i],
+            camera_matrix0, dist_coeffs0, proj0);
+
+        cv::projectPoints(object_points[i], rvecs1[i], tvecs1[i],
+            camera_matrix1, dist_coeffs1, proj1);
+
+        // ===== DRAW =====
+        for (int j = 0; j < image_points0[i].size(); j++)
+        {
+            drawCross(img0, image_points0[i][j], cv::Scalar(0, 255, 0));
+            drawCross(img0, proj0[j], cv::Scalar(0, 0, 255));
+
+            drawCross(img1, image_points1[i][j], cv::Scalar(0, 255, 0));
+            drawCross(img1, proj1[j], cv::Scalar(0, 0, 255));
+        }
+
+        // ===== CONCAT =====
+        cv::Mat combined;
+        cv::hconcat(img0, img1, combined);
+
+        // ===== ZOOM (inchangé) =====
+        image_original = combined.clone();
+        zoom = 1.0;
+
+        cv::namedWindow("Verification calibration", cv::WINDOW_NORMAL);
+        cv::setMouseCallback("Verification calibration", onMouse);
+
+        while (true)
+        {
+            cv::Mat display;
+
+            int w = image_original.cols;
+            int h = image_original.rows;
+
+            int new_w = w / zoom;
+            int new_h = h / zoom;
+
+            int x = mouse_x - new_w / 2;
+            int y = mouse_y - new_h / 2;
+
+            x = std::max(0, std::min(x, w - new_w));
+            y = std::max(0, std::min(y, h - new_h));
+
+            cv::Rect roi(x, y, new_w, new_h);
+            cv::Mat cropped = image_original(roi);
+
+            cv::resize(cropped, display, cv::Size(w, h));
+
+            cv::imshow("Verification calibration", display);
+
+            int key = cv::waitKey(30);
+
+            if (key == 27) return; // ESC
+            if (key == 'n') break; // next
+        }
+
+        cv::destroyAllWindows();
+    }
 }
+
 
 // =======================
 // MAIN WRAPPER

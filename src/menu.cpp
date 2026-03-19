@@ -57,6 +57,7 @@ void menu()
             std::cout << "1 : Prendre photos\n";
             std::cout << "2 : Calibration camera\n";
             std::cout << "3 : Verification calibration\n";
+            std::cout << "4 : Verification stereo calibration\n";
             std::cout << "0 : Retour\n";
 
             std::cin >> choix;
@@ -69,6 +70,10 @@ void menu()
 
             else if (choix == 3)
                 verification_calibration();
+
+            else if (choix == 4)
+				std::cout << "Verification stereo calibration : EN ATTENTE\n";
+			//verification_stereo_calibration();
 
             else if (choix == 0)
                 niveau = 0;
