@@ -24,7 +24,7 @@ set(SOURCES
     src/capture_cam.cpp
     src/calibration.cpp
     src/verification_calibration.cpp
-    src/gestion_XML.cpp
+    src/stereo_calibration.cpp
 )
 
 add_executable(main ${SOURCES})
