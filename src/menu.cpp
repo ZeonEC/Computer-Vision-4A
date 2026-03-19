@@ -57,7 +57,6 @@ void menu()
             std::cout << "1 : Prendre photos\n";
             std::cout << "2 : Calibration camera\n";
             std::cout << "3 : Verification calibration\n";
-            std::cout << "4 : Gestion XML\n";
             std::cout << "0 : Retour\n";
 
             std::cin >> choix;
@@ -71,31 +70,10 @@ void menu()
             else if (choix == 3)
                 verification_calibration();
 
-            else if (choix == 4)
-                niveau = 2;
-
             else if (choix == 0)
                 niveau = 0;
         }
 
-        // sous menu XML
-        else if (niveau == 2)
-        {
-            std::cout << "\n===== MENU XML =====\n";
-            std::cout << "1 : Sauvegarder calibration\n";
-            std::cout << "2 : Charger calibration\n";
-            std::cout << "0 : Retour\n";
-
-            std::cin >> choix;
-
-            if (choix == 1)
-                save_calibration_xml();
-
-            else if (choix == 2)
-                get_calibration_from_xml();
-
-            else if (choix == 0)
-                niveau = 1;
-        }
+       
     }
 }
