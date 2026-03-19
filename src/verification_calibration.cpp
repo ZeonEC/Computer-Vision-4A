@@ -172,7 +172,7 @@ void verif_distortion(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coeffs,
 		cv::imshow("Image undistordue de la calibration numero : " + std::to_string(i), undistorted_image);
 
 		cv::waitKey(0);
-		cv::destroyAllWindows();
+		cv::destroyAllWindows();	
 	}
 	cv::destroyAllWindows();
 }
