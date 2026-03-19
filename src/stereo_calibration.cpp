@@ -30,7 +30,7 @@ void stereo_calibration()
     std::vector<std::vector<cv::Point2f>> image_points1, image_points2;
 
     get_calibration_from_xml(
-        "calibration_cam0.xml",
+        "../../../calibration_images/results/calibration_cam0_result.xml",
         camera_matrix1,
         dist_coeffs1,
         rvecs1,
@@ -44,7 +44,7 @@ void stereo_calibration()
     );
 
     get_calibration_from_xml(
-        "calibration_cam1.xml",
+        "../../../calibration_images/results/calibration_cam1_result.xml",
         camera_matrix2,
         dist_coeffs2,
         rvecs2,
@@ -57,84 +57,82 @@ void stereo_calibration()
         image_points2
     );
 
-    // Vérifications de cohérence minimales
     if (camera_matrix1.empty() || dist_coeffs1.empty() ||
         camera_matrix2.empty() || dist_coeffs2.empty())
     {
-        std::cerr << "Erreur : matrices intrinseques ou coefficients de distorsion vides." << std::endl;
+        std::cerr << "Erreur : calibration mono non chargee correctement." << std::endl;
         return;
     }
 
     if (taille_image1 != taille_image2)
     {
-        std::cerr << "Erreur : les tailles d'image des deux cameras sont differentes." << std::endl;
+        std::cerr << "Erreur : tailles d'image differentes entre les deux cameras." << std::endl;
         return;
     }
 
     if (pattern_size1 != pattern_size2)
     {
-        std::cerr << "Erreur : les tailles de damier des deux cameras sont differentes." << std::endl;
+        std::cerr << "Erreur : pattern_size different entre les deux cameras." << std::endl;
         return;
     }
 
     if (square_size1 != square_size2)
     {
-        std::cerr << "Erreur : les tailles de carre du damier sont differentes." << std::endl;
+        std::cerr << "Erreur : square_size different entre les deux cameras." << std::endl;
         return;
     }
 
     if (image_points1.empty() || image_points2.empty())
     {
-        std::cerr << "Erreur : points image vides." << std::endl;
+        std::cerr << "Erreur : image_points vide." << std::endl;
         return;
     }
 
     if (image_points1.size() != image_points2.size())
     {
         std::cerr << "Erreur : nombre de vues different entre les deux cameras." << std::endl;
-        std::cerr << "camera 1 : " << image_points1.size() << " vues" << std::endl;
-        std::cerr << "camera 2 : " << image_points2.size() << " vues" << std::endl;
+        std::cerr << "Cam0 : " << image_points1.size() << std::endl;
+        std::cerr << "Cam1 : " << image_points2.size() << std::endl;
         return;
     }
 
-    const int nb_points_attendus = pattern_size1.width * pattern_size1.height;
+    int nb_points = pattern_size1.width * pattern_size1.height;
 
-    for (size_t i = 0; i < image_points1.size(); i++)
+    for (size_t i = 0; i < image_points1.size(); ++i)
     {
-        if (image_points1[i].size() != static_cast<size_t>(nb_points_attendus) ||
-            image_points2[i].size() != static_cast<size_t>(nb_points_attendus))
+        if (image_points1[i].size() != static_cast<size_t>(nb_points) ||
+            image_points2[i].size() != static_cast<size_t>(nb_points))
         {
             std::cerr << "Erreur : nombre de coins invalide a la vue " << i << std::endl;
-            std::cerr << "camera 1 : " << image_points1[i].size() << " points" << std::endl;
-            std::cerr << "camera 2 : " << image_points2[i].size() << " points" << std::endl;
+            std::cerr << "Cam0 : " << image_points1[i].size() << std::endl;
+            std::cerr << "Cam1 : " << image_points2[i].size() << std::endl;
             return;
         }
     }
 
-    // Construction des points 3D du damier
-    std::vector<cv::Point3f> one_pattern_points;
-    one_pattern_points.reserve(nb_points_attendus);
+    std::vector<cv::Point3f> pattern_points;
+    pattern_points.reserve(nb_points);
 
-    for (int y = 0; y < pattern_size1.height; y++)
+    for (int y = 0; y < pattern_size1.height; ++y)
     {
-        for (int x = 0; x < pattern_size1.width; x++)
+        for (int x = 0; x < pattern_size1.width; ++x)
         {
-            one_pattern_points.push_back(
+            pattern_points.push_back(
                 cv::Point3f(
-                    static_cast<float>(x) * square_size1,
-                    static_cast<float>(y) * square_size1,
+                    x * square_size1,
+                    y * square_size1,
                     0.0f
                 )
             );
         }
     }
 
-    std::vector<std::vector<cv::Point3f>> objectPoints(image_points1.size(), one_pattern_points);
+    std::vector<std::vector<cv::Point3f>> object_points(image_points1.size(), pattern_points);
 
     cv::Mat R, T, E, F;
 
-    double rms = cv::stereoCalibrate(
-        objectPoints,
+    double rmsStereo = cv::stereoCalibrate(
+        object_points,
         image_points1,
         image_points2,
         camera_matrix1,
@@ -147,25 +145,21 @@ void stereo_calibration()
         E,
         F,
         cv::CALIB_FIX_INTRINSIC,
-        cv::TermCriteria(
-            cv::TermCriteria::COUNT + cv::TermCriteria::EPS,
-            100,
-            1e-5
-        )
+        cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 100, 1e-5)
     );
 
     std::cout << "Stereo calibration terminee." << std::endl;
-    std::cout << "RMS stereo = " << rms << std::endl;
+    std::cout << "RMS stereo : " << rmsStereo << std::endl;
 
-    std::cout << "Matrice R :" << std::endl;
+    std::cout << "R =" << std::endl;
     std::cout << R << std::endl;
 
-    std::cout << "Vecteur T :" << std::endl;
+    std::cout << "T =" << std::endl;
     std::cout << T << std::endl;
 
-    std::cout << "Matrice E :" << std::endl;
+    std::cout << "E =" << std::endl;
     std::cout << E << std::endl;
 
-    std::cout << "Matrice F :" << std::endl;
+    std::cout << "F =" << std::endl;
     std::cout << F << std::endl;
 }

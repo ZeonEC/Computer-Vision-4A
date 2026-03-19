@@ -6,6 +6,7 @@
 #include "gestion_XML.hpp"
 #include "verification_calibration.hpp"
 #include "stereo_capture_cam.hpp"
+#include "stereo_calibration.hpp"
 
 void menu()
 {
@@ -21,6 +22,7 @@ void menu()
 		std::cout << "2. Recuperez une calibration depuis un fichier XML " << std::endl;
 		std::cout << "3. Tester la calibration " << std::endl;
 		std::cout << "4. Tester la stereo-calibration " << std::endl;
+		std::cout << "5. stereo-calibration " << std::endl;
 		std::cout << "Autre. Quittez" << std::endl;
 		std::cin >> choix;
 
@@ -102,6 +104,12 @@ void menu()
 			std::cout << "Renseignez le nombre de caméras que vous voulez verifier : " << std::endl;
 			std::cin >> nb_cam;
 			stereo_capture_cam(taille_image, nb_cam);
+		}
+
+		else if (choix == 5) {
+			std::cout << "Renseignez le nombre de caméras que vous voulez verifier : " << std::endl;
+			std::cin >> nb_cam;
+			stereo_calibration();
 		}
 		else {
 			std::cout << "Arret programme" << std::endl;

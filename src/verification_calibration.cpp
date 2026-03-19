@@ -122,15 +122,14 @@ void verif_projection(int& nb_cam) {
 
 		// conclusion
 		std::cout << "__________________CONCLUSION__________________" << std::endl;
+	}
 
-
-		//-------------------------------------
+	//-------------------------------------
 		/// Mise a dispo dasn un fichier texte
 		// restaurer la console
-		std::cout.rdbuf(cout_buffer);
-		logfile.close();
-		//-------------------------------------
-	}
+	std::cout.rdbuf(cout_buffer);
+	logfile.close();
+	//-------------------------------------
 }
 
 void verif_distortion(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coeffs, cv::Size& taille_image, int cur_cam) {
