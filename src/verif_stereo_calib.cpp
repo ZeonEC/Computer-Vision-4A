@@ -194,6 +194,6 @@ void verif_projection(int& nb_cam)
 // =======================
 void verification_calibration()
 {
-    int nb_cam = 1;
+    int nb_cam = 2;
     verif_projection(nb_cam);
 }
