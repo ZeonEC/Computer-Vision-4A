@@ -119,8 +119,9 @@ void verif_projection(int& nb_cam)
 
             for (int j = 0; j < image_points[i].size(); j++)
             {
-                drawCross(calib_image, image_points[i][j], cv::Scalar(0, 255, 0));
-                drawCross(calib_image, projected_points[j], cv::Scalar(0, 0, 255));
+				drawCross(calib_image, image_points[i][j], cv::Scalar(0, 255, 0)); // vert = points detectes
+				drawCross(calib_image, projected_points[j], cv::Scalar(0, 0, 255)); // rouge = points projetes
+                //drawCross(calib_image, image_points[i][j], cv::Scalar(0, 255, 0)); // vert = points detectes
             }
 
             // =======================
@@ -134,6 +135,8 @@ void verif_projection(int& nb_cam)
 
             while (true)
             {
+                cv::Mat display;
+
                 int w = image_original.cols;
                 int h = image_original.rows;
 
@@ -143,26 +146,25 @@ void verif_projection(int& nb_cam)
                 int x = mouse_x - new_w / 2;
                 int y = mouse_y - new_h / 2;
 
-                // sécurité (éviter sortir de l’image)
                 x = std::max(0, std::min(x, w - new_w));
                 y = std::max(0, std::min(y, h - new_h));
 
                 cv::Rect roi(x, y, new_w, new_h);
-
                 cv::Mat cropped = image_original(roi);
 
-                cv::Mat display;
                 cv::resize(cropped, display, cv::Size(w, h));
 
                 cv::imshow("Verification calibration", display);
 
                 int key = cv::waitKey(30);
 
-                if (key == 27) break;
+                if (key == 27) return; // ESC → quitter
 
-                if (cv::getWindowProperty("Verification calibration", cv::WND_PROP_VISIBLE) < 1)
-                    break;
+                if (key == 'n') break; // passer à l’image suivante
             }
+
+            
+           
 
             cv::destroyAllWindows();
         }
