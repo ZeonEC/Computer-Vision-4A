@@ -7,12 +7,14 @@
 #include "verification_calibration.hpp"
 #include "stereo_capture_cam.hpp"
 #include "stereo_calibration.hpp"
+///#include "verif_stereo_calib.hpp"
 
 void menu()
 {
     cv::Size taille_image = cv::Size(600, 600);
     int choix = 0;
     int nb_cam = 0;
+	int nb_calib = 0;
 
 
     while (true)
@@ -109,7 +111,11 @@ void menu()
 		else if (choix == 5) {
 			std::cout << "Renseignez le nombre de caméras que vous voulez verifier : " << std::endl;
 			std::cin >> nb_cam;
-			stereo_calibration();
+
+			std::cout << "Renseignez le nombre d'images que vous voulez verifier : " << std::endl;
+			std::cin >> nb_calib;
+
+			stereo_calibration(nb_calib);
 		}
 		else {
 			std::cout << "Arret programme" << std::endl;
