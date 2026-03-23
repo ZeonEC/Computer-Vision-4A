@@ -3,7 +3,6 @@
 
 #include "gestion_XML.hpp" // header contenant la déclaration de la fonction
 
-#include <string>
 
 
 // Sauvegarde les paramètres de calibration dans un fichier XML
@@ -143,4 +142,52 @@ void get_calibration_from_xml(const std::string& filename,
 	fs.release(); //fermeture
 
 	std::cout << "Calibration chargee depuis : " << filename << std::endl;
+}
+
+void save_stereo_calibration_xml(const std::string& filename,
+	const cv::Mat& camera_matrix_left,
+	const cv::Mat& dist_coeffs_left,
+	const cv::Mat& camera_matrix_right,
+	const cv::Mat& dist_coeffs_right,
+	const cv::Mat& R, const cv::Mat& T, const cv::Mat& E, const cv::Mat& F)
+{
+	cv::FileStorage fs(filename, cv::FileStorage::WRITE);
+	if (!fs.isOpened()) {
+		std::cerr << "Erreur : impossible d'ouvrir le fichier XML en ecriture.\n";
+		return;
+	}
+	fs << "camera_matrix_left" << camera_matrix_left;
+	fs << "dist_coeffs_left" << dist_coeffs_left;
+	fs << "camera_matrix_right" << camera_matrix_right;
+	fs << "dist_coeffs_right" << dist_coeffs_right;
+	fs << "R" << R;
+	fs << "T" << T;
+	fs << "E" << E;
+	fs << "F" << F;
+	fs.release();
+	std::cout << "Calibration stereo sauvegardee dans : " << filename << std::endl;
+}
+
+void get_stereo_calibration_from_xml(const std::string& filename,
+	cv::Mat& camera_matrix_left,
+	cv::Mat& dist_coeffs_left,
+	cv::Mat& camera_matrix_right,
+	cv::Mat& dist_coeffs_right,
+	cv::Mat& R, cv::Mat& T, cv::Mat& E, cv::Mat& F)
+{
+	cv::FileStorage fs(filename, cv::FileStorage::READ);
+	if (!fs.isOpened()) {
+		std::cerr << "Erreur : impossible d'ouvrir le fichier XML en lecture.\n";
+		return;
+	}
+	fs["camera_matrix_left"] >> camera_matrix_left;
+	fs["dist_coeffs_left"] >> dist_coeffs_left;
+	fs["camera_matrix_right"] >> camera_matrix_right;
+	fs["dist_coeffs_right"] >> dist_coeffs_right;
+	fs["R"] >> R;
+	fs["T"] >> T;
+	fs["E"] >> E;
+	fs["F"] >> F;
+	fs.release();
+	std::cout << "Calibration stereo chargee depuis : " << filename << std::endl;
 }
