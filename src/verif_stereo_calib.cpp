@@ -378,5 +378,5 @@ void verif_projection_stereo(int& nb_cam)
 void verification_calibration_stereo()
 {
     int nb_cam = 2;
-    verif_projection(nb_cam);
+    verif_projection_stereo(nb_cam);
 }

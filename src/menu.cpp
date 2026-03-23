@@ -6,7 +6,7 @@
 #include "calibration.hpp"
 #include "gestion_XML.hpp"
 #include "verification_calibration.hpp"
-
+#include "verif_stereo_calib.hpp"
 
 void menu()
 {
@@ -35,8 +35,13 @@ void menu()
                 niveau = 1;
 
             else if (choix == 2)
+            {
                 std::cout << "Geometrie epipolaire : stéréo calibration\n";
-                //verif_stereo_calib();
+                int nb_cam = 2;
+                verif_projection_stereo(nb_cam);
+                verification_calibration_stereo();
+            }
+                
 
             else if (choix == 3)
                 std::cout << "Rectification : EN ATTENTE\n";
