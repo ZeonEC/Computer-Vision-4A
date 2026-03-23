@@ -6,6 +6,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "verif_stereo_calib.hpp"
+#include "gestion_XML.hpp"
 
 // =======================
 // ZOOM GLOBAL

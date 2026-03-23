@@ -36,10 +36,7 @@ void menu()
 
             else if (choix == 2)
             {
-                std::cout << "Geometrie epipolaire : stéréo calibration\n";
-                int nb_cam = 2;
-                verif_projection_stereo(nb_cam);
-                verification_calibration_stereo();
+				niveau = 2;
             }
                 
 
@@ -80,6 +77,29 @@ void menu()
                 niveau = 0;
         }
 
+		// sous menu géometrie epipolaire
+        else if (niveau == 2)
+        {
+            std::cout << "\n===== MENU GEOMETRIE EPIPOLAIRE =====\n";
+            std::cout << "1 : Prendre des photos stéréo\n";
+            std::cout << "2 : Calibration stereo\n";
+            std::cout << "3 : Verification calibration stereo\n";
+            std::cout << "0 : Retour\n";
+
+            std::cin >> choix;
+
+            if (choix == 1)
+                std::cout << "Déjà fait";
+
+            else if (choix == 2)
+                stereo_calibration();
+
+            else if (choix == 3)    
+                verification_calibration_stereo();
+
+            else if (choix == 0)
+                niveau = 0;
+        }
        
     }
 }
