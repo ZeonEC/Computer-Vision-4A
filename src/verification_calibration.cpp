@@ -7,25 +7,59 @@
 // Test log dans fichier texte :
 #include <fstream>
 
+
+/// GESTION DE LA VERIFICATION DE LA CALIBRATION + zoom sur image
+
+// =======================
+// ZOOM GLOBAL
+// =======================
+double zoom = 1.0;
+cv::Mat image_original;
+
+int mouse_x = 0;
+int mouse_y = 0;
+
+// =======================
+// CALLBACK SOURIS (zoom)
+// =======================
+
+void onMouse(int event, int x, int y, int flags, void*)
+{
+	mouse_x = x;
+	mouse_y = y;
+
+	if (event == cv::EVENT_MOUSEWHEEL)
+	{
+		if (flags > 0)
+			zoom *= 1.2;
+		else
+			zoom /= 1.2;
+
+		zoom = std::max(1.0, std::min(zoom, 10.0));
+	}
+}
+
+// =======================
+// CROIX
+// =======================
+void drawCross(cv::Mat& image, cv::Point2f pt, cv::Scalar color)
+{
+	int size = 2;
+
+	cv::line(image,
+		cv::Point(pt.x - size, pt.y - size),
+		cv::Point(pt.x + size, pt.y + size),
+		color, 1);
+
+	cv::line(image,
+		cv::Point(pt.x - size, pt.y + size),
+		cv::Point(pt.x + size, pt.y - size),
+		color, 1);
+}
+
 // verification de la calibration de la caméra en comparant les paramètres obtenus avec calibrateCamera et projectPoint()
 
 void verif_projection(int& nb_cam) {
-
-	//-------------------------------------
-	/// Mise a dispo dans un fichier texte
-	std::ofstream logfile("../../../calibration_images/results/verification_projection.txt");
-
-	if (!logfile.is_open()) {
-		std::cout << "Impossible de creer le fichier log" << std::endl;
-		return;
-	}
-	// sauvegarde du buffer console
-	std::streambuf* cout_buffer = std::cout.rdbuf();
-	// redirection vers fichier
-	std::cout.rdbuf(logfile.rdbuf());
-	//-------------------------------------
-
-
 
 	for (int cur_cam = 0; cur_cam < nb_cam; cur_cam++)
 	{
@@ -43,7 +77,6 @@ void verif_projection(int& nb_cam) {
 		get_calibration_from_xml(filename,
 			camera_matrix, dist_coeffs, rvecs, tvecs, perViewErrors, RMS, taille_image, pattern_size, square_size, image_points);
 
-
 		double fx = camera_matrix.at<double>(0, 0); // fx
 		double fy = camera_matrix.at<double>(1, 1); // fy
 		double focal_diff = std::abs(fx - fy);
@@ -55,7 +88,6 @@ void verif_projection(int& nb_cam) {
 		std::cout << "__________________TEST DES FOCALES__________________" << std::endl;
 		std::cout << "Verification de fx et fy (valeurs en pixels): " << std::endl;
 		std::cout << "Difference entre les deux focales : " << focal_diff << std::endl;
-
 
 		// verification de cx, cy
 
@@ -80,11 +112,11 @@ void verif_projection(int& nb_cam) {
 		std::vector<cv::Point3f> obj;
 		std::vector<std::vector<cv::Point3f>> object_points;
 
-		for (int i = 0; i < pattern_size.height; i++)
+		for (int i = 0; i < pattern_size.width; i++)
 		{
-			for (int j = 0; j < pattern_size.width; j++)
+			for (int j = 0; j < pattern_size.height; j++)
 			{
-				obj.push_back(cv::Point3f(i * square_size, j * square_size, 0.0f));
+				obj.push_back(cv::Point3f(j * square_size, i * square_size, 0.0f));
 			}
 		}
 
@@ -94,25 +126,92 @@ void verif_projection(int& nb_cam) {
 		}
 
 		// On crée un nouveau tableau de points projetés pour chaque image de calibration
-		std::vector<cv::Point2f> projected_points;
 		double rms_error = 0.0;
+		int total_points = 0;
 
-		for (int i = 0; i < image_points.size(); i++)
+		for (size_t i = 0; i < image_points.size(); i++)
 		{
-			for (int j = 0; j < image_points[i].size(); j++)
+			std::string image_filename =
+				"../../../calibration_images/calib_cam"
+				+ std::to_string(cur_cam) + "_"
+				+ std::to_string(i + 1) + ".png";
+
+			cv::Mat calib_image = cv::imread(image_filename);
+
+			if (calib_image.empty()) {
+				std::cout << "Impossible de charger : " << image_filename << std::endl;
+				continue;
+			}
+
+			std::vector<cv::Point2f> projected_points;
+			cv::projectPoints(object_points[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs, projected_points);
+
+			for (size_t j = 0; j < image_points[i].size(); j++)
 			{
-				cv::projectPoints(object_points[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs, projected_points);
 				double error_x = std::abs(image_points[i][j].x - projected_points[j].x);
 				double error_y = std::abs(image_points[i][j].y - projected_points[j].y);
 
-				std::cout << "Erreur de reprojection pour l'image en X " << i + 1 << " : " << error_x << std::endl;
-				std::cout << "Erreur de reprojection pour l'image en Y " << i + 1 << " : " << error_x << std::endl;
+				std::cout << "Erreur de reprojection pour l'image " << i + 1 << " en X : " << error_x << std::endl;
+				std::cout << "Erreur de reprojection pour l'image " << i + 1 << " en Y : " << error_y << std::endl;
 
 				rms_error += error_x * error_x + error_y * error_y;
+				total_points++;
+
+				drawCross(calib_image, image_points[i][j], cv::Scalar(0, 255, 0)); // vert = points detectes
+				drawCross(calib_image, projected_points[j], cv::Scalar(0, 0, 255)); // rouge = points projetes
 			}
+
+			image_original = calib_image.clone();
+			zoom = 1.0;
+			mouse_x = image_original.cols / 2;
+			mouse_y = image_original.rows / 2;
+
+			cv::namedWindow("Verification calibration", cv::WINDOW_NORMAL);
+			cv::setMouseCallback("Verification calibration", onMouse);
+
+			while (true)
+			{
+				cv::Mat display;
+
+				int w = image_original.cols;
+				int h = image_original.rows;
+
+				int new_w = static_cast<int>(w / zoom);
+				int new_h = static_cast<int>(h / zoom);
+
+				new_w = std::max(1, std::min(new_w, w));
+				new_h = std::max(1, std::min(new_h, h));
+
+				int x = mouse_x - new_w / 2;
+				int y = mouse_y - new_h / 2;
+
+				x = std::max(0, std::min(x, w - new_w));
+				y = std::max(0, std::min(y, h - new_h));
+
+				cv::Rect roi(x, y, new_w, new_h);
+				cv::Mat cropped = image_original(roi);
+
+				cv::resize(cropped, display, cv::Size(w, h));
+
+				cv::imshow("Verification calibration", display);
+
+				int key = cv::waitKey(30);
+
+				if (key == 'n') break; // passer à l’image suivante
+			}
+			cv::destroyAllWindows();
 		}
+
 		// comparaison
-		rms_error = std::sqrt(rms_error / (image_points.size() * pattern_size.width * pattern_size.height));
+		if (total_points > 0)
+		{
+			rms_error = std::sqrt(rms_error / total_points);
+		}
+		else
+		{
+			rms_error = 0.0;
+		}
+
 		double rms_compare = std::abs(RMS - rms_error);
 
 		std::cout << "__________________COMPARAISON__________________" << std::endl;
@@ -123,13 +222,6 @@ void verif_projection(int& nb_cam) {
 		// conclusion
 		std::cout << "__________________CONCLUSION__________________" << std::endl;
 	}
-
-	//-------------------------------------
-		/// Mise a dispo dasn un fichier texte
-		// restaurer la console
-	std::cout.rdbuf(cout_buffer);
-	logfile.close();
-	//-------------------------------------
 }
 
 void verif_distortion(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coeffs, cv::Size& taille_image, int cur_cam) {
@@ -175,3 +267,31 @@ void verif_distortion(int nb_to_try, cv::Mat camera_matrix, cv::Mat dist_coeffs,
 	}
 	cv::destroyAllWindows();
 }
+
+
+
+
+
+/*//-------------------------------------
+	/// Mise a dispo dans un fichier texte
+	std::ofstream logfile("../../../calibration_images/results/verification_projection.txt");
+
+	if (!logfile.is_open()) {
+		std::cout << "Impossible de creer le fichier log" << std::endl;
+		return;
+	}
+	// sauvegarde du buffer console
+	std::streambuf* cout_buffer = std::cout.rdbuf();
+	// redirection vers fichier
+	std::cout.rdbuf(logfile.rdbuf());
+
+
+
+
+		//-------------------------------------
+		/// Mise a dispo dasn un fichier texte
+		// restaurer la console
+	std::cout.rdbuf(cout_buffer);
+	logfile.close();
+	//-------------------------------------
+	//-------------------------------------*/
