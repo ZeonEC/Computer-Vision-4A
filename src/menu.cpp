@@ -35,7 +35,8 @@ void menu()
                 niveau = 1;
 
             else if (choix == 2)
-                std::cout << "Geometrie epipolaire : EN ATTENTE\n";
+                std::cout << "Geometrie epipolaire : stéréo calibration\n";
+                //verif_stereo_calib();
 
             else if (choix == 3)
                 std::cout << "Rectification : EN ATTENTE\n";
@@ -57,7 +58,6 @@ void menu()
             std::cout << "1 : Prendre photos\n";
             std::cout << "2 : Calibration camera\n";
             std::cout << "3 : Verification calibration\n";
-            std::cout << "4 : Verification stereo calibration\n";
             std::cout << "0 : Retour\n";
 
             std::cin >> choix;
@@ -70,10 +70,6 @@ void menu()
 
             else if (choix == 3)
                 verification_calibration();
-
-            else if (choix == 4)
-				std::cout << "Verification stereo calibration : EN ATTENTE\n";
-			//verification_stereo_calibration();
 
             else if (choix == 0)
                 niveau = 0;

@@ -18,7 +18,6 @@ int mouse_y = 0;
 // =======================
 // CALLBACK SOURIS (zoom)
 // =======================
-
 void onMouse(int event, int x, int y, int flags, void*)
 {
     mouse_x = x;
@@ -42,15 +41,26 @@ void drawCross(cv::Mat& image, cv::Point2f pt, cv::Scalar color)
 {
     int size = 2;
 
-    cv::line(image,
-        cv::Point(pt.x - size, pt.y - size),
-        cv::Point(pt.x + size, pt.y + size),
-        color, 1);
+    cv::line(image, cv::Point(pt.x - size, pt.y - size),
+        cv::Point(pt.x + size, pt.y + size), color, 1);
 
-    cv::line(image,
-        cv::Point(pt.x - size, pt.y + size),
-        cv::Point(pt.x + size, pt.y - size),
-        color, 1);
+    cv::line(image, cv::Point(pt.x - size, pt.y + size),
+        cv::Point(pt.x + size, pt.y - size), color, 1);
+}
+
+// =======================
+// DROITE EPIPOLAIRE
+// =======================
+void drawEpipolarLine(cv::Mat& img, cv::Vec3f line, cv::Scalar color)
+{
+    double a = line[0];
+    double b = line[1];
+    double c = line[2];
+
+    cv::Point p1(0, -c / b);
+    cv::Point p2(img.cols, -(c + a * img.cols) / b);
+
+    cv::line(img, p1, p2, color, 1);
 }
 
 // =======================
@@ -96,6 +106,19 @@ void verif_projection(int& nb_cam)
         pattern_size1, square_size1, image_points1
     );
 
+    // ===== LOAD F MATRIX =====
+    cv::Mat F;
+    cv::FileStorage fs("../../../calibration_images/results/stereo_result.xml", cv::FileStorage::READ);
+
+    if (!fs.isOpened())
+    {
+        std::cout << "Erreur ouverture stereo_result.xml" << std::endl;
+        return;
+    }
+
+    fs["F"] >> F;
+    fs.release();
+
     // ===== OBJECT POINTS =====
     std::vector<cv::Point3f> obj;
     std::vector<std::vector<cv::Point3f>> object_points;
@@ -134,21 +157,33 @@ void verif_projection(int& nb_cam)
         cv::projectPoints(object_points[i], rvecs1[i], tvecs1[i],
             camera_matrix1, dist_coeffs1, proj1);
 
+        // ===== EPIPOLAR LINES =====
+        std::vector<cv::Vec3f> lignes1, lignes2;
+
+        cv::computeCorrespondEpilines(image_points0[i], 1, F, lignes2);
+        cv::computeCorrespondEpilines(image_points1[i], 2, F, lignes1);
+
         // ===== DRAW =====
         for (int j = 0; j < image_points0[i].size(); j++)
         {
+            // points
             drawCross(img0, image_points0[i][j], cv::Scalar(0, 255, 0));
-            drawCross(img0, proj0[j], cv::Scalar(0, 0, 255));
-
             drawCross(img1, image_points1[i][j], cv::Scalar(0, 255, 0));
+
+            // reprojection
+            drawCross(img0, proj0[j], cv::Scalar(0, 0, 255));
             drawCross(img1, proj1[j], cv::Scalar(0, 0, 255));
+
+            // épipolaire
+            drawEpipolarLine(img1, lignes2[j], cv::Scalar(255, 0, 0));
+            drawEpipolarLine(img0, lignes1[j], cv::Scalar(255, 0, 0));
         }
 
         // ===== CONCAT =====
         cv::Mat combined;
         cv::hconcat(img0, img1, combined);
 
-        // ===== ZOOM (inchangé) =====
+        // ===== ZOOM =====
         image_original = combined.clone();
         zoom = 1.0;
 
@@ -180,14 +215,13 @@ void verif_projection(int& nb_cam)
 
             int key = cv::waitKey(30);
 
-            if (key == 27) return; // ESC
-            if (key == 'n') break; // next
+            if (key == 27) return;
+            if (key == 'n') break;
         }
 
         cv::destroyAllWindows();
     }
 }
-
 
 // =======================
 // MAIN WRAPPER
