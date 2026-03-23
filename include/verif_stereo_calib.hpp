@@ -12,5 +12,5 @@ extern int mouse_y;
 void onMouse(int event, int x, int y, int flags, void*);
 void drawCross(cv::Mat& image, cv::Point2f pt, cv::Scalar color);
 
-void verif_projection(int& nb_cam);
+void verif_projection_stereo(int& nb_cam);
 void verification_calibration_stereo();

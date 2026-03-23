@@ -196,7 +196,7 @@ bool loadFundamentalMatrixStereo(const std::string& filename, cv::Mat& F)
 // =======================
 // VERIFICATION
 // =======================
-void verif_projection(int& nb_cam)
+void verif_projection_stereo(int& nb_cam)
 {
     if (nb_cam < 2)
     {
