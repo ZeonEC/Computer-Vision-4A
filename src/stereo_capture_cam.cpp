@@ -1,6 +1,9 @@
 #include <iostream>
 #include <filesystem>
 
+#include <string>
+
+
 #include "stereo_capture_cam.hpp"
 
 void stereo_capture_cam(cv::Size taille_image, int& nb_cam) {

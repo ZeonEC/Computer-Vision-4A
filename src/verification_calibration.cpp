@@ -1,6 +1,9 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
+#include <string>
+
+
 #include "verification_calibration.hpp"
 #include "gestion_XML.hpp"
 

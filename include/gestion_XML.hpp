@@ -1,5 +1,10 @@
 #pragma once
 
+#include <string>
+#include <vector>
+#include <opencv2/opencv.hpp>
+
+
 void save_calibration_xml(const std::string& filename,
 	const cv::Mat& camera_matrix,
 	const cv::Mat& dist_coeffs,

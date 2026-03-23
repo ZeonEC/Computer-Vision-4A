@@ -3,6 +3,7 @@
 
 #include "gestion_XML.hpp" // header contenant la déclaration de la fonction
 
+#include <string>
 
 
 // Sauvegarde les paramètres de calibration dans un fichier XML
