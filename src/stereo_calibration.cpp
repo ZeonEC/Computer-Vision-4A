@@ -57,6 +57,9 @@ void stereo_calibration()
         image_points2
     );
 
+    std::cout << "pattern_size.width = " << pattern_size1.width << std::endl;
+    std::cout << "pattern_size.height = " << pattern_size1.height << std::endl;
+
     if (camera_matrix1.empty() || dist_coeffs1.empty() ||
         camera_matrix2.empty() || dist_coeffs2.empty())
     {
@@ -96,7 +99,7 @@ void stereo_calibration()
         return;
     }
 
-    int nb_points = pattern_size1.width * pattern_size1.height;
+    int nb_points = pattern_size1.height * pattern_size1.width;
 
     for (size_t i = 0; i < image_points1.size(); ++i)
     {
@@ -134,12 +137,12 @@ void stereo_calibration()
 	// peut modifier les matrices K donc on met CALIB_FIX_INTRINSIC pour les garder fixes
     double rmsStereo = cv::stereoCalibrate(
         object_points,
-        image_points1,
         image_points2,
-        camera_matrix1,
-        dist_coeffs1,
+        image_points1,
         camera_matrix2,
         dist_coeffs2,
+        camera_matrix1,
+        dist_coeffs1,
         taille_image1,
         R,
         T,

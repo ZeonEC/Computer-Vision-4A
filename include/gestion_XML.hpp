@@ -27,3 +27,23 @@ void get_calibration_from_xml(const std::string& filename,
     cv::Size& pattern_size,
     float& square_size,
     std::vector<std::vector<cv::Point2f>>& image_points);
+
+void save_stereo_calibration_xml(const std::string& filename,
+	const cv::Mat& camera_matrix1,
+	const cv::Mat& dist_coeffs1,
+    const cv::Mat& camera_matrix2,
+    const cv::Mat& dist_coeffs2,
+    const cv::Mat& R,
+    const cv::Mat& T,
+    const cv::Mat& E,
+	const cv::Mat& F);
+
+void get_stereo_calibration_from_xml(const std::string& filename,
+    cv::Mat& camera_matrix1,
+    cv::Mat& dist_coeffs1,
+    cv::Mat& camera_matrix2,
+    cv::Mat& dist_coeffs2,
+    cv::Mat& R,
+    cv::Mat& T,
+    cv::Mat& E,
+	cv::Mat& F);

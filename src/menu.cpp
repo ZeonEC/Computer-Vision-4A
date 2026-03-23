@@ -21,7 +21,7 @@ void menu()
 		std::cout << "1. Effectuer une calibration " << std::endl;
 		std::cout << "2. Recuperez une calibration depuis un fichier XML " << std::endl;
 		std::cout << "3. Tester la calibration " << std::endl;
-		std::cout << "4. Tester la stereo-calibration " << std::endl;
+		std::cout << "4. Image pour stereo claib " << std::endl;
 		std::cout << "5. stereo-calibration " << std::endl;
 		std::cout << "Autre. Quittez" << std::endl;
 		std::cin >> choix;
