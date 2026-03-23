@@ -81,7 +81,7 @@ void menu()
         else if (niveau == 2)
         {
             std::cout << "\n===== MENU GEOMETRIE EPIPOLAIRE =====\n";
-            std::cout << "1 : Prendre des photos stéréo\n";
+            std::cout << "1 : Prendre des photos stereo\n";
             std::cout << "2 : Calibration stereo\n";
             std::cout << "3 : Verification calibration stereo\n";
             std::cout << "0 : Retour\n";
