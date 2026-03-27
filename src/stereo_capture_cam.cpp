@@ -10,7 +10,7 @@ void stereo_capture_cam(cv::Size taille_image, int& nb_cam) {
 
     for (int cur_cam = 0; cur_cam < nb_cam; cur_cam++) {
 
-        cv::VideoCapture cap(cur_cam+1, cv::CAP_DSHOW);
+        cv::VideoCapture cap(cur_cam + 1, cv::CAP_DSHOW);
         if (!cap.isOpened()) {
             std::cerr << "Erreur: impossible d'ouvrir la camera (index 0).\n";
             std::cerr << "Essaie CAP_MSMF ou un autre index (1,2...).\n";
@@ -62,22 +62,69 @@ void stereo_capture_cam(cv::Size taille_image, int& nb_cam) {
 
         if (key == 's' || key == 'S')
         {
-            nb_calib++;
-            std::cout << "Capture stereo #" << nb_calib << std::endl;
-
+            // Copier les images actuelles pour figer la capture
+            std::vector<cv::Mat> preview_frames(frames.size());
             for (int i = 0; i < frames.size(); i++)
-            {
-                std::string filename = img_path + "calib_cam" + std::to_string(i)
-                    + "_" + std::to_string(nb_calib) + ".png";
+                {preview_frames[i] = frames[i].clone();}
 
-                if (cv::imwrite(filename, frames[i]))
+            // Afficher les previews
+            std::vector<std::string> previewNames;
+            previewNames.reserve(preview_frames.size());
+
+            for (int i = 0; i < preview_frames.size(); i++)
+            {
+                std::string previewName = "Preview Camera " + std::to_string(i);
+                previewNames.push_back(previewName);
+                cv::namedWindow(previewName, cv::WINDOW_AUTOSIZE);
+                cv::imshow(previewName, preview_frames[i]);
+                cv::moveWindow(previewName, i*800, i*50);
+            }
+
+            std::cout << "Appuie sur G pour garder, N pour rejeter, ESC pour quitter." << std::endl;
+
+            // Attendre la décision utilisateur
+            while (true)
+            {
+                int previewKey = cv::waitKey(0);
+
+                if (previewKey == 'g' || previewKey == 'G')
                 {
-                    std::cout << "Image sauvegardee : " << filename << std::endl;
+                    nb_calib++;
+                    std::cout << "Capture stereo gardee #" << nb_calib << std::endl;
+
+                    for (int i = 0; i < preview_frames.size(); i++)
+                    {
+                        std::string filename = img_path + "calib_cam" + std::to_string(i)
+                            + "_" + std::to_string(nb_calib) + ".png";
+
+                        if (cv::imwrite(filename, preview_frames[i]))
+                        {
+                            std::cout << "Image sauvegardee : " << filename << std::endl;
+                        }
+                        else
+                        {
+                            std::cerr << "Erreur : impossible de sauvegarder " << filename << std::endl;
+                        }
+                    }
+                    break;
                 }
-                else
+                else if (previewKey == 'n' || previewKey == 'N' || previewKey == 'r' || previewKey == 'R')
                 {
-                    std::cerr << "Erreur : impossible de sauvegarder " << filename << std::endl;
+                    std::cout << "Capture rejetee." << std::endl;
+                    break;
                 }
+                else if (previewKey == 27) // ESC
+                {
+                    for (const auto& name : previewNames)
+                        cv::destroyWindow(name);
+                    return;
+                }
+            }
+
+            // Fermer les previews
+            for (const auto& name : previewNames)
+            {
+                cv::destroyWindow(name);
             }
         }
     }

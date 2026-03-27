@@ -13,7 +13,7 @@ std::vector<std::vector<cv::Point2f>> get_grid_points(int nb_calib, int cur_cam)
 	// on alloue la place dans le vecteur 
 	images_grid_points.reserve(std::max(0, nb_calib - 1));
 
-	cv::Size pattern_size(7, 9); // nombre de coins interieurs dans la grille (7x9)
+	cv::Size pattern_size(4, 5); // nombre de coins interieurs dans la grille (5x6)
 
 
 	for (int i = 1; i < nb_calib + 1; i++)
@@ -70,8 +70,8 @@ void calibration(std::vector<std::vector<cv::Point2f>>& calibration_points, cv::
 	// points 3D dans le monde réel de la grille de calibration, on suppose que la grille est sur le plan z=0
 	// ils sont espace de 12mm, donc 12*12
 	// calcule des points 3D de la grille de calibration
-	cv::Size pattern_size(7, 9); // nombre de coins interieurs dans la grille (7x9)
-	float square_size = 20.0f; // taille d'un carre en mm
+	cv::Size pattern_size(4, 5); // nombre de coins interieurs dans la grille (7x9)
+	float square_size = 40.0f; // taille d'un carre en mm
 	std::vector<cv::Vec3f> obj; // vecteur pour les points de la grille
 	std::vector<std::vector<cv::Vec3f>> obj_points; //vecteur qui contiendra tt nos vecteur obj
 

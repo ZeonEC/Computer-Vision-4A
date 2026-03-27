@@ -90,7 +90,7 @@ void get_stereo_grid_points(
     std::vector<std::vector<cv::Point2f>>& image_points0,
     std::vector<std::vector<cv::Point2f>>& image_points1)
 {
-    cv::Size pattern_size(7, 9); // nombre de coins interieurs dans la grille (7x9)
+    cv::Size pattern_size(4, 5); // nombre de coins interieurs dans la grille (7x9)
 
     image_points0.clear();
     image_points1.clear();
@@ -176,6 +176,9 @@ void get_stereo_grid_points(
 
             cv::imshow("Stereo cam0 --- img" + std::to_string(i), display_cam0);
             cv::imshow("Stereo cam1 --- img" + std::to_string(i), display_cam1);
+
+            cv::moveWindow("Stereo cam0 --- img" + std::to_string(i), 50, 50);
+            cv::moveWindow("Stereo cam1 --- img" + std::to_string(i), 800, 50);
 
             int key = cv::waitKey(0);
 

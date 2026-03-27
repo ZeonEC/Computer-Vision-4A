@@ -20,10 +20,14 @@ void menu()
     while (true)
     {
 		std::cout << "Que voulez vous faire ? " << std::endl;
+		std::cout << " " << std::endl;
+		std::cout << "----- MONO CALIBRATION -----" << std::endl;
 		std::cout << "1. Effectuer une calibration " << std::endl;
 		std::cout << "2. Recuperez une calibration depuis un fichier XML " << std::endl;
 		std::cout << "3. Tester la calibration " << std::endl;
-		std::cout << "4. Image pour stereo claib " << std::endl;
+		std::cout << " " << std::endl;
+		std::cout << "----- STEREO CALIBRATION -----" << std::endl;
+		std::cout << "4. Prendre des photos " << std::endl;
 		std::cout << "5. stereo-calibration " << std::endl;
 		std::cout << "Autre. Quittez" << std::endl;
 		std::cin >> choix;
@@ -102,16 +106,14 @@ void menu()
 			verif_projection(nb_cam);
 		}
 
+		// STERO CALIBRATION
 		else if (choix == 4) {
-			std::cout << "Renseignez le nombre de caméras que vous voulez verifier : " << std::endl;
-			std::cin >> nb_cam;
+			nb_cam = 2;
 			stereo_capture_cam(taille_image, nb_cam);
 		}
 
 		else if (choix == 5) {
-			std::cout << "Renseignez le nombre de caméras que vous voulez verifier : " << std::endl;
-			std::cin >> nb_cam;
-
+			nb_cam = 2;
 			std::cout << "Renseignez le nombre d'images que vous voulez verifier : " << std::endl;
 			std::cin >> nb_calib;
 
