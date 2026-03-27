@@ -377,18 +377,7 @@ void stereo_calibration(int &nb_calib)
 
     std::cout << "Stereo calibration terminee." << std::endl;
     std::cout << "RMS stereo : " << rmsStereo << std::endl;
-
-    std::cout << "R =" << std::endl;
-    std::cout << R << std::endl;
-
-    std::cout << "T =" << std::endl;
-    std::cout << T << std::endl;
-
-    std::cout << "E =" << std::endl;
-    std::cout << E << std::endl;
-
-    std::cout << "F =" << std::endl;
-    std::cout << F << std::endl;
-    
+    std::string XML_filename = "../../../calibration_images/results/stereo_calibration_result.xml";
+    save_stereo_calibration_xml(XML_filename, camera_matrix1, camera_matrix2, dist_coeffs1, dist_coeffs2, R, T, E, F, rmsStereo);   
 }
 

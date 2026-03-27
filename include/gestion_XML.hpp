@@ -36,7 +36,8 @@ void save_stereo_calibration_xml(const std::string& filename,
     const cv::Mat& R,
     const cv::Mat& T,
     const cv::Mat& E,
-	const cv::Mat& F);
+	const cv::Mat& F,
+    double& rmsStereo);
 
 void get_stereo_calibration_from_xml(const std::string& filename,
     cv::Mat& camera_matrix1,
@@ -46,4 +47,5 @@ void get_stereo_calibration_from_xml(const std::string& filename,
     cv::Mat& R,
     cv::Mat& T,
     cv::Mat& E,
-	cv::Mat& F);
+	cv::Mat& F,
+    double& rmsStereo);

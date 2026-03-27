@@ -149,7 +149,8 @@ void save_stereo_calibration_xml(const std::string& filename,
 	const cv::Mat& dist_coeffs_left,
 	const cv::Mat& camera_matrix_right,
 	const cv::Mat& dist_coeffs_right,
-	const cv::Mat& R, const cv::Mat& T, const cv::Mat& E, const cv::Mat& F)
+	const cv::Mat& R, const cv::Mat& T, const cv::Mat& E, const cv::Mat& F,
+	double& rmsStereo)
 {
 	cv::FileStorage fs(filename, cv::FileStorage::WRITE);
 	if (!fs.isOpened()) {
@@ -164,6 +165,7 @@ void save_stereo_calibration_xml(const std::string& filename,
 	fs << "T" << T;
 	fs << "E" << E;
 	fs << "F" << F;
+	fs << "RMS" << rmsStereo;
 	fs.release();
 	std::cout << "Calibration stereo sauvegardee dans : " << filename << std::endl;
 }
@@ -173,7 +175,8 @@ void get_stereo_calibration_from_xml(const std::string& filename,
 	cv::Mat& dist_coeffs_left,
 	cv::Mat& camera_matrix_right,
 	cv::Mat& dist_coeffs_right,
-	cv::Mat& R, cv::Mat& T, cv::Mat& E, cv::Mat& F)
+	cv::Mat& R, cv::Mat& T, cv::Mat& E, cv::Mat& F,
+	double& rmsStereo)
 {
 	cv::FileStorage fs(filename, cv::FileStorage::READ);
 	if (!fs.isOpened()) {
@@ -188,6 +191,7 @@ void get_stereo_calibration_from_xml(const std::string& filename,
 	fs["T"] >> T;
 	fs["E"] >> E;
 	fs["F"] >> F;
+	fs["RMS"] >> rmsStereo;
 	fs.release();
 	std::cout << "Calibration stereo chargee depuis : " << filename << std::endl;
 }
