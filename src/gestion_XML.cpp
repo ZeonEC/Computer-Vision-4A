@@ -170,6 +170,7 @@ void save_stereo_calibration_xml(const std::string& filename,
 	std::cout << "Calibration stereo sauvegardee dans : " << filename << std::endl;
 }
 
+
 void get_stereo_calibration_from_xml(const std::string& filename,
 	cv::Mat& camera_matrix_left,
 	cv::Mat& dist_coeffs_left,

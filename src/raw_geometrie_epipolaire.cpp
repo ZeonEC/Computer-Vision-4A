@@ -24,11 +24,17 @@ void drawEpipolarLine(cv::Mat& img, const cv::Vec3f& line, const cv::Scalar& col
 
     cv::Point p1, p2;
 
-    if (std::abs(b) > 1e-6f)
+    // si b n'est pas nul, on calcule les points d'intersection avec les bords de l'image
+	// dans le cas contraire alors ax + c = 0 => x = -c/a, on trace une droite horizontale
+	if (std::abs(b) > 1e-6f) 
     {
+		// on part du principe que a=0 et x = img.cols - 1 (donc x = -c/b) pour trouver 
+        // les points d'intersection avec les bords de l'image, en gros quand on trace la ligne
+		// on part du bord gauche et on va jusqu'au bord droit, et on calcule les y correspondants
         p1 = cv::Point(0, cvRound(-c / b));
         p2 = cv::Point(img.cols - 1, cvRound(-(c + a * (img.cols - 1)) / b));
     }
+	// Même raisonnement que pour b, mais dans ce cas on trace une droite verticale
     else if (std::abs(a) > 1e-6f)
     {
         int x = cvRound(-c / a);
@@ -45,7 +51,7 @@ void drawEpipolarLine(cv::Mat& img, const cv::Vec3f& line, const cv::Scalar& col
 
 // Reset affichage
 void resetDisplays()
-{
+{   
 	// l'image actuelle est une copie de l'originale pour pouvoir dessiner dessus
     cur_imgleft = img_gauche_og.clone();
     cur_imgright = img_droite_og.clone();
@@ -62,14 +68,20 @@ void onMouseLeft(int event, int x, int y, int, void*)
         return;
     }
 
-    resetDisplays();
+	// reset de l'affichage pour ne pas garder les anciennes droites epipolaires
+    // resetDisplays();
 
+	// Prend en compte le point cliqué dans l'image gauche
     cv::Point2f clickedPoint(static_cast<float>(x), static_cast<float>(y));
+	// on fait un cercle rouge pour marquer le point cliqué
+	// (img, centre, rayon, couleur, epaisseur)
     cv::circle(cur_imgleft, clickedPoint, 5, cv::Scalar(0, 0, 255), -1);
 
     std::vector<cv::Point2f> pointsLeft(1, clickedPoint);
     std::vector<cv::Vec3f> epilinesRight;
 
+    // on pourrais faire plein de points mais ça sert a rien autant tt faire au clic souris, ça reviens au même 
+    // et c'est plus simple
     cv::computeCorrespondEpilines(pointsLeft, 1, Fondamentale, epilinesRight);
 
     if (!epilinesRight.empty())
@@ -83,24 +95,29 @@ void onMouseLeft(int event, int x, int y, int, void*)
     std::cout << "[GAUCHE] Point clique : (" << x << ", " << y << ")" << std::endl;
 }
 
-// -----------------------------------------------------------------------------
 // Clique image droite -> calcule droite dans image gauche
-// -----------------------------------------------------------------------------
-static void onMouseRight(int event, int x, int y, int, void*)
+void onMouseRight(int event, int x, int y, int, void*)
 {
     if (event != cv::EVENT_LBUTTONDOWN)
     {
         return;
     }
 
-    resetDisplays();
+    // reset de l'affichage pour ne pas garder les anciennes droites epipolaires
+    // resetDisplays();
 
+    // Prend en compte le point cliqué dans l'image droite
     cv::Point2f clickedPoint(static_cast<float>(x), static_cast<float>(y));
+
+    // on fait un cercle rouge pour marquer le point cliqué
+    // (img, centre, rayon, couleur, epaisseur)
     cv::circle(cur_imgright, clickedPoint, 5, cv::Scalar(0, 0, 255), -1);
 
     std::vector<cv::Point2f> pointsRight(1, clickedPoint);
     std::vector<cv::Vec3f> epilinesLeft;
 
+    // ici whichImage = 2 car le point vient de l'image droite
+    // OpenCV calcule donc la droite epipolaire correspondante dans l'image gauche
     cv::computeCorrespondEpilines(pointsRight, 2, Fondamentale, epilinesLeft);
 
     if (!epilinesLeft.empty())
@@ -133,7 +150,7 @@ void raw_geometrie_epipolaire(
     }
 
     img_gauche_og = img_gauche.clone();
-    img_droite_og = img_gauche.clone();
+    img_droite_og = img_droite.clone();
    	Fondamentale = F.clone();
 
     windowLeft = "Camera de gauche";
@@ -166,6 +183,17 @@ void raw_geometrie_epipolaire(
         }
     }
 
+    // on désactive avant, par problème de pointeur
+    cv::setMouseCallback(windowLeft, nullptr);
+    cv::setMouseCallback(windowRight, nullptr);
+
     cv::destroyWindow(windowLeft);
     cv::destroyWindow(windowRight);
+    cv::waitKey(1);
+
+    cur_imgleft.release();
+    cur_imgright.release();
+    img_gauche_og.release();
+    img_droite_og.release();
+    Fondamentale.release();
 }
