@@ -360,12 +360,12 @@ void stereo_calibration(int &nb_calib)
 	// peut modifier les matrices K donc on met CALIB_FIX_INTRINSIC pour les garder fixes
     double rmsStereo = cv::stereoCalibrate(
         object_points,
-        image_points_2,
         image_points_1,
-        camera_matrix2,
-        dist_coeffs2,
+        image_points_2,
         camera_matrix1,
         dist_coeffs1,
+        camera_matrix2,
+        dist_coeffs2,
         taille_image1,
         R,
         T,

@@ -3,5 +3,5 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
-#include <opencv2/calib3d.hpp>
 
+void verif_stereo_calib(int nb_calib);

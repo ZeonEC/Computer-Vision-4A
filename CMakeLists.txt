@@ -41,6 +41,7 @@ set(SOURCES
     src/stereo_calibration.cpp
     src/stereo_capture_cam.cpp
     src/verif_stereo_calib.cpp
+    src/raw_geometrie_epipolaire.cpp
 )
 
 # -------------------------------------------------

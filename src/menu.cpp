@@ -7,6 +7,8 @@
 #include "verification_calibration.hpp"
 #include "stereo_capture_cam.hpp"
 #include "stereo_calibration.hpp"
+#include "verif_stereo_calib.hpp"
+
 ///#include "verif_stereo_calib.hpp"
 
 void menu()
@@ -29,6 +31,7 @@ void menu()
 		std::cout << "----- STEREO CALIBRATION -----" << std::endl;
 		std::cout << "4. Prendre des photos " << std::endl;
 		std::cout << "5. stereo-calibration " << std::endl;
+		std::cout << "6. Geometrie épipolaire et rectification " << std::endl;
 		std::cout << "Autre. Quittez" << std::endl;
 		std::cin >> choix;
 
@@ -119,6 +122,15 @@ void menu()
 
 			stereo_calibration(nb_calib);
 		}
+
+		else if (choix == 6) {
+			nb_cam = 2;
+			std::cout << "Renseignez le nombre d'images que vous voulez verifier : " << std::endl;
+			std::cin >> nb_calib;
+
+			verif_stereo_calib(nb_calib);
+		}
+
 		else {
 			std::cout << "Arret programme" << std::endl;
 			return;
