@@ -33,13 +33,21 @@ include_directories(
 # -------------------------------------------------
 set(SOURCES
     src/main.cpp
+    src/menu.cpp
     src/capture_cam.cpp
+    src/calibration.cpp
+    src/verification_calibration.cpp
+    src/gestion_XML.cpp
+    src/stereo_calibration.cpp
+    src/stereo_capture_cam.cpp
+    src/verif_stereo_calib.cpp
+    src/raw_geometrie_epipolaire.cpp
 )
 
 # -------------------------------------------------
-# Création de l'exécutable principal
+# Création de l'exécutable main
 # -------------------------------------------------
-add_executable(main ${SOURCES})
+add_executable(main ${SOURCES} )
 
 # -------------------------------------------------
 # Link avec OpenCV

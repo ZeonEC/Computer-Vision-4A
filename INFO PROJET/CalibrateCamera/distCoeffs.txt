@@ -1,0 +1,43 @@
+distCoeffs (distortion coefficients) contient les paramètres qui modélisent les défauts optiques de la caméra.
+
+Une vraie lentille ne projette pas parfaitement les points :
+les lignes droites peuvent apparaître courbées (distorsion radiale)
+et l'image peut être légèrement décalée (distorsion tangentielle).
+
+OpenCV utilise généralement 5 coefficients principaux :
+
+k1 k2 p1 p2 k3
+
+avec :
+
+k1 k2 k3 :
+coefficients de distorsion radiale (effet barrel ou pincushion)
+
+p1 p2 :
+coefficients de distorsion tangentielle (mauvais alignement lentille/capteur)
+
+Structure typique :
+
+distCoeffs = [k1 k2 p1 p2 k3]
+
+ou parfois :
+
+distCoeffs = [k1 k2 p1 p2 k3 k4 k5 k6]
+
+Initialisation standard avant calibration :
+
+cv::Mat distCoeffs = cv::Mat::zeros(8,1,CV_64F);
+
+OpenCV va ensuite remplir ces valeurs pendant la calibration.
+
+Ces coefficients servent ensuite à corriger les images avec :
+
+cv::undistort(image, corrected, cameraMatrix, distCoeffs);
+
+En résumé :
+
+cameraMatrix :
+corrige la projection géométrique
+
+distCoeffs :
+corrige les défauts optiques de la lentille

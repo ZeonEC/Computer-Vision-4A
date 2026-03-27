@@ -1,10 +1,17 @@
 #include <iostream>
 
-#include "capture_cam.h"
+// Libs OpenCV
+//#include <opencv2/calib3d.hpp>
+//#include <opencv2/core.hpp>
+//#include <opencv2/highgui.hpp>
+//#include <opencv2/improc.hpp>
+
+#include "menu.hpp"
+
 
 int main() {
+	std::cout << "BRANCHE EC_calib2" << std::endl;
 
-	std::cout << "Hello, Computer Vision!" << std::endl;
-	capture_cam();
+	menu();
 	return 0;
 }
