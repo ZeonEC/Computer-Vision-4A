@@ -1,4 +1,4 @@
-#include "test_order_chessboard.hpp"
+#include "test_chessboard.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <iostream>

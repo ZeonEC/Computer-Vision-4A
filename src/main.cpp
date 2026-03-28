@@ -11,6 +11,8 @@
 #include "menu.hpp"
 #include "verification_calibration.hpp"
 #include "verif_stereo_calib.hpp"
+#include "test_chessboard.hpp"
+
 
 int main() {
 	std::cout << "BRANCHE MG_Calibration" << std::endl;

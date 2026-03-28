@@ -7,7 +7,7 @@
 #include "gestion_XML.hpp"
 #include "verification_calibration.hpp"
 #include "verif_stereo_calib.hpp"
-#include "test_order_chessboard.hpp"
+#include "test_chessboard.hpp"
 
 void menu()
 {
