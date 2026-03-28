@@ -3,10 +3,60 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/calib3d.hpp>
 
+// =======================
+// NORMALISATION DAMIER
+// =======================
+void normalizeChessboard(std::vector<cv::Point2f>& pts, cv::Size patternSize)
+{
+    if (pts.size() != static_cast<size_t>(patternSize.width * patternSize.height))
+        return;
+
+    // vecteur horizontal
+    cv::Point2f dx = pts[1] - pts[0];
+
+    // vecteur vertical
+    cv::Point2f dy = pts[patternSize.width] - pts[0];
+
+    // inversion horizontale (ligne inversée)
+    if (dx.x < 0)
+    {
+        for (int y = 0; y < patternSize.height; y++)
+        {
+            std::reverse(
+                pts.begin() + y * patternSize.width,
+                pts.begin() + (y + 1) * patternSize.width
+            );
+        }
+    }
+
+    // recalcul après correction
+    dx = pts[1] - pts[0];
+    dy = pts[patternSize.width] - pts[0];
+
+    // inversion verticale (damier retourné)
+    if (dy.y < 0)
+    {
+        std::vector<cv::Point2f> temp = pts;
+
+        for (int y = 0; y < patternSize.height; y++)
+        {
+            for (int x = 0; x < patternSize.width; x++)
+            {
+                pts[y * patternSize.width + x] =
+                    temp[(patternSize.height - 1 - y) * patternSize.width + x];
+            }
+        }
+    }
+}
+
+// =======================
+// CALIBRATION STEREO
+// =======================
 void stereo_calibration()
 {
     std::cout << "STEREO RUNNING" << std::endl;
@@ -65,7 +115,7 @@ void stereo_calibration()
     );
 
     // =======================
-    // VERIFS MINIMALES
+    // VERIFS
     // =======================
     if (camera_matrix1.empty() || camera_matrix2.empty())
         return;
@@ -75,6 +125,15 @@ void stereo_calibration()
 
     if (image_points1.size() != image_points2.size())
         return;
+
+    // =======================
+    // 🔥 CORRECTION DES POINTS
+    // =======================
+    for (size_t i = 0; i < image_points1.size(); i++)
+    {
+        normalizeChessboard(image_points1[i], pattern_size1);
+        normalizeChessboard(image_points2[i], pattern_size2);
+    }
 
     // =======================
     // OBJECT POINTS
@@ -104,7 +163,7 @@ void stereo_calibration()
     // =======================
     cv::Mat R, T, E, F;
 
-    cv::stereoCalibrate(
+    double rms = cv::stereoCalibrate(
         object_points,
         image_points1,
         image_points2,
@@ -120,8 +179,10 @@ void stereo_calibration()
         cv::CALIB_FIX_INTRINSIC
     );
 
+    std::cout << "RMS stereo = " << rms << std::endl;
+
     // =======================
-    // SAUVEGARDE FICHIER
+    // SAUVEGARDE
     // =======================
     cv::FileStorage fs(
         "../../../calibration_images/results/stereo_result.xml",
