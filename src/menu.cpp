@@ -7,6 +7,7 @@
 #include "gestion_XML.hpp"
 #include "verification_calibration.hpp"
 #include "verif_stereo_calib.hpp"
+#include "test_order_chessboard.hpp"
 
 void menu()
 {
@@ -59,7 +60,8 @@ void menu()
             std::cout << "\n===== MENU CALIBRATION =====\n";
             std::cout << "1 : Prendre photos\n";
             std::cout << "2 : Calibration camera\n";
-            std::cout << "3 : Verification calibration\n";
+            std::cout << "3 : Vérification chessbord\n";
+            std::cout << "4 : Verification calibration\n";
             std::cout << "0 : Retour\n";
 
             std::cin >> choix;
@@ -71,6 +73,9 @@ void menu()
                 calibration();
 
             else if (choix == 3)
+                test_order_chessboard();
+
+            else if (choix == 4)
                 verification_calibration();
 
             else if (choix == 0)
