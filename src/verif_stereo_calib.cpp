@@ -90,9 +90,7 @@ void verif_stereo_calib(int nb_calib) {
                 break;
             }
         }
-
         cv::destroyWindow("Image rectifiee CAM0");
         cv::destroyWindow("Image rectifiee CAM1");
     }
-
 }
