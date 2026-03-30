@@ -1,6 +1,7 @@
 #include "verif_stereo_calib.hpp"
 #include "gestion_XML.hpp"
 #include "raw_geometrie_epipolaire.hpp"
+#include "disparity.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <iostream>
@@ -27,17 +28,23 @@ void show_rect_img(
     cv::remap(img2, rect2, map2x, map2y, cv::INTER_LINEAR);
 
     // Dessin de lignes horizontales pour vérifier l'alignement épipolaire
+    // Pour l'instant on fait pas mettre un points 
     for (int y = 0; y < rect1.rows; y += 30)
     {
         cv::line(rect1, cv::Point(0, y), cv::Point(rect1.cols - 1, y), cv::Scalar(0, 255, 0), 1);
         cv::line(rect2, cv::Point(0, y), cv::Point(rect2.cols - 1, y), cv::Scalar(0, 255, 0), 1);
     }
     
-    cv::namedWindow("Image rectifiee CAM0", cv::WINDOW_AUTOSIZE);
-    cv::namedWindow("Image rectifiee CAM1", cv::WINDOW_AUTOSIZE);
+    //cv::namedWindow("Image rectifiee CAM0", cv::WINDOW_AUTOSIZE);
+    //cv::namedWindow("Image rectifiee CAM1", cv::WINDOW_AUTOSIZE);
 
-    cv::imshow("Image rectifiee CAM0", rect1);
-    cv::imshow("Image rectifiee CAM1", rect2);
+    cv::Mat recti_img;
+    cv::hconcat(rect1, rect2, recti_img);
+    cv::imshow("Images rectifiée", recti_img);
+    //cv::imshow("Image rectifiee CAM0", rect1);
+    //cv::imshow("Image rectifiee CAM1", rect2);
+
+    show_disparity(rect1, rect2);
 }
 
 void verif_stereo_calib(int nb_calib) {
@@ -90,9 +97,6 @@ void verif_stereo_calib(int nb_calib) {
                 break;
             }
         }
-
-        cv::destroyWindow("Image rectifiee CAM0");
-        cv::destroyWindow("Image rectifiee CAM1");
+        cv::destroyAllWindows();
     }
-
 }
