@@ -31,7 +31,7 @@ void menu()
 		std::cout << "----- STEREO CALIBRATION -----" << std::endl;
 		std::cout << "4. Prendre des photos " << std::endl;
 		std::cout << "5. stereo-calibration " << std::endl;
-		std::cout << "6. Geometrie épipolaire et rectification " << std::endl;
+		std::cout << "6. Geometrie epipolaire et rectification " << std::endl;
 		std::cout << "Autre. Quittez" << std::endl;
 		std::cin >> choix;
 
@@ -39,11 +39,11 @@ void menu()
 		{
 			int choix_photo = 0;
 			int nb_to_try = 0;
-			std::cout << "Renseignez le nombre de caméras que vous voulez calibrer : " << std::endl;
+			std::cout << "Renseignez le nombre de cameras que vous voulez calibrer : " << std::endl;
 			std::cin >> nb_cam;
 
 
-			std::cout << "Voulez vous reprendre des photos ou utilisez celles déja en mémoire ? " << std::endl;
+			std::cout << "Voulez vous reprendre des photos ou utilisez celles deja en memoire ? " << std::endl;
 			std::cout << "1. Reprendre des photos " << std::endl;
 			std::cout << "2. Garder les anciennes " << std::endl;
 			std::cout << "Autre. Quittez" << std::endl;
@@ -59,7 +59,7 @@ void menu()
 				}
 				else if (choix_photo == 2) // Non pour reprendre des photos 
 				{
-					std::cout << "Renseignez le nombre d'images de calibration que vous avez déjà prises : " << std::endl;
+					std::cout << "Renseignez le nombre d'images de calibration que vous avez deja prises : " << std::endl;
 					std::cin >> nb_to_try;
 				}
 				else {
@@ -82,7 +82,7 @@ void menu()
 		else if (choix == 2) // L'utilisateur veut recuperer une calibration depuis un fichier XML
 		{
 
-			std::cout << "Renseignez le nombre de caméras que vous voulez charger : " << std::endl;
+			std::cout << "Renseignez le nombre de cameras que vous voulez charger : " << std::endl;
 			std::cin >> nb_cam;
 
 			for (int cur_cam = 0; cur_cam < nb_cam; cur_cam++)
@@ -104,7 +104,7 @@ void menu()
 
 		else if (choix == 3) // L'utilisateur veut tester la calibration
 		{
-			std::cout << "Renseignez le nombre de caméras que vous voulez verifier : " << std::endl;
+			std::cout << "Renseignez le nombre de cameras que vous voulez verifier : " << std::endl;
 			std::cin >> nb_cam;
 			verif_projection(nb_cam);
 		}
